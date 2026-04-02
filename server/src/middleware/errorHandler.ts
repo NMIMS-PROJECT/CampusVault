@@ -1,6 +1,13 @@
-import { Request, Response, NextFunction } from 'express';
+﻿import type { Request, Response, NextFunction } from 'express';
 
-// Custom error class for API errors
+declare global {
+  namespace Express {
+    interface Request {
+      id?: string;
+    }
+  }
+}
+
 export class APIError extends Error {
   constructor(
     public statusCode: number,
@@ -13,7 +20,6 @@ export class APIError extends Error {
   }
 }
 
-// Specific error types
 export class ValidationError extends APIError {
   constructor(message: string, details?: any) {
     super(400, message, 'VALIDATION_ERROR', details);
@@ -34,7 +40,7 @@ export class AuthorizationError extends APIError {
 
 export class NotFoundError extends APIError {
   constructor(resource: string = 'Resource') {
-    super(404, `${resource} not found`, 'NOT_FOUND_ERROR');
+    super(404, \\ not found\, 'NOT_FOUND_ERROR');
   }
 }
 
@@ -46,12 +52,7 @@ export class ConflictError extends APIError {
 
 export class InsufficientCreditsError extends APIError {
   constructor(required: number, available: number) {
-    super(
-      402,
-      'Insufficient credits',
-      'INSUFFICIENT_CREDITS_ERROR',
-      { required, available }
-    );
+    super(402, 'Insufficient credits', 'INSUFFICIENT_CREDITS_ERROR', { required, available });
   }
 }
 
@@ -73,67 +74,30 @@ export class ServerError extends APIError {
   }
 }
 
-// Global error handler middleware
-export const errorHandler = (
-  err: Error | APIError,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  // Log error for debugging
-  console.error('❌ Error:', {
-    name: err.name,
-    message: err.message,
-    stack: err.stack,
-    url: req.url,
-    method: req.method,
-    timestamp: new Date().toISOString(),
-  });
-
-  // Default error response
+export const errorHandler = (err: Error | APIError, req: Request, res: Response, next: NextFunction) => {
+  console.error('Error:', { name: err.name, message: err.message, stack: err.stack, url: req.url, method: req.method, timestamp: new Date().toISOString() });
+  
   let statusCode = 500;
-  let errorResponse: any = {
-    success: false,
-    error: 'Internal Server Error',
-    code: 'SERVER_ERROR',
-  };
-
+  let errorResponse: any = { success: false, error: 'Internal Server Error', code: 'SERVER_ERROR' };
+  
   if (err instanceof APIError) {
     statusCode = err.statusCode;
-    errorResponse = {
-      success: false,
-      error: err.message,
-      code: err.code,
-      ...(err.details && { details: err.details }),
-    };
+    errorResponse = { success: false, error: err.message, code: err.code, ...(err.details && { details: err.details }) };
   } else if (err instanceof SyntaxError) {
     statusCode = 400;
-    errorResponse = {
-      success: false,
-      error: 'Invalid JSON in request body',
-      code: 'PARSE_ERROR',
-    };
+    errorResponse = { success: false, error: 'Invalid JSON in request body', code: 'PARSE_ERROR' };
   } else {
-    // Generic error handling
-    errorResponse = {
-      success: false,
-      error: err.message || 'An unexpected error occurred',
-      code: 'UNKNOWN_ERROR',
-    };
+    errorResponse = { success: false, error: err.message || 'An unexpected error occurred', code: 'UNKNOWN_ERROR' };
   }
-
-  // Add request ID for tracking
+  
   if (req.id) {
     errorResponse.requestId = req.id;
   }
-
+  
   res.status(statusCode).json(errorResponse);
 };
 
-// Async error wrapper to handle promises in route handlers
-export const asyncHandler = (
-  fn: (req: Request, res: Response, next: NextFunction) => Promise<void>
-) => {
+export const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) => {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };

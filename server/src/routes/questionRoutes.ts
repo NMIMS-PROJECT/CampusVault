@@ -1,15 +1,27 @@
-import express, { Request, Response } from 'express';
+﻿import express from 'express';
+import type { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { verifyFirebaseToken } from '../middleware/authMiddleware';
+import { verifyFirebaseToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// POST: Create a new question
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        uid: string;
+        email?: string;
+        [key: string]: any;
+      };
+    }
+  }
+}
+
 router.post('/', verifyFirebaseToken, async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, company, text, isPaid, cost } = req.body;
-    const authorId = req.user?.uid;
+    const authorId = (req as any).user?.uid;
 
     if (!authorId) {
       res.status(401).json({ error: 'Unauthorized' });
@@ -26,7 +38,6 @@ router.post('/', verifyFirebaseToken, async (req: Request, res: Response): Promi
       return;
     }
 
-    // Verify student exists
     const student = await prisma.student.findUnique({
       where: { id: authorId },
     });
@@ -66,7 +77,6 @@ router.post('/', verifyFirebaseToken, async (req: Request, res: Response): Promi
   }
 });
 
-// GET: Fetch all questions
 router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const { company, isPaid } = req.query;
@@ -114,7 +124,6 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// GET: Fetch question by ID
 router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
@@ -152,9 +161,8 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// POST: Purchase answer (with transaction)
 router.post('/:id/purchase', verifyFirebaseToken, async (req: Request, res: Response): Promise<void> => {
-  const buyerId = req.user?.uid;
+  const buyerId = (req as any).user?.uid;
   const { id: questionId } = req.params;
 
   if (!buyerId) {
@@ -163,9 +171,7 @@ router.post('/:id/purchase', verifyFirebaseToken, async (req: Request, res: Resp
   }
 
   try {
-    // Start transaction using raw SQL or Prisma transaction
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. Fetch the question
+    const result = await prisma.\(async (tx: any) => {
       const question = await tx.question.findUnique({
         where: { id: questionId },
         include: {
@@ -181,7 +187,6 @@ router.post('/:id/purchase', verifyFirebaseToken, async (req: Request, res: Resp
         throw new Error('This question is not for sale');
       }
 
-      // 2. Check if already purchased
       const existingPurchase = await tx.questionPurchase.findUnique({
         where: {
           questionId_buyerId: {
@@ -195,7 +200,6 @@ router.post('/:id/purchase', verifyFirebaseToken, async (req: Request, res: Resp
         throw new Error('You have already purchased this answer');
       }
 
-      // 3. Fetch buyer and verify credits
       const buyer = await tx.student.findUnique({
         where: { id: buyerId },
       });
@@ -208,7 +212,6 @@ router.post('/:id/purchase', verifyFirebaseToken, async (req: Request, res: Resp
         throw new Error('Insufficient credits');
       }
 
-      // 4. Deduct credits from buyer
       const updatedBuyer = await tx.student.update({
         where: { id: buyerId },
         data: {
@@ -218,7 +221,6 @@ router.post('/:id/purchase', verifyFirebaseToken, async (req: Request, res: Resp
         },
       });
 
-      // 5. Add credits to author
       const updatedAuthor = await tx.student.update({
         where: { id: question.authorId },
         data: {
@@ -228,7 +230,6 @@ router.post('/:id/purchase', verifyFirebaseToken, async (req: Request, res: Resp
         },
       });
 
-      // 6. Create purchase record
       const purchase = await tx.questionPurchase.create({
         data: {
           questionId,
@@ -254,7 +255,6 @@ router.post('/:id/purchase', verifyFirebaseToken, async (req: Request, res: Resp
   } catch (error: any) {
     console.error('Error processing purchase:', error);
 
-    // Handle transaction-specific errors
     const errorMessage = error.message || 'Failed to process purchase';
     const statusCode = errorMessage.includes('Insufficient credits') ? 402 :
                       errorMessage.includes('not found') ? 404 :
@@ -267,19 +267,17 @@ router.post('/:id/purchase', verifyFirebaseToken, async (req: Request, res: Resp
   }
 });
 
-// POST: Add answer to question (only author can do this)
 router.post('/:id/answer', verifyFirebaseToken, async (req: Request, res: Response): Promise<void> => {
   try {
     const { id: questionId } = req.params;
     const { answer } = req.body;
-    const userId = req.user?.uid;
+    const userId = (req as any).user?.uid;
 
     if (!userId || !answer) {
       res.status(400).json({ error: 'Missing required fields' });
       return;
     }
 
-    // Verify the user is the author
     const question = await prisma.question.findUnique({
       where: { id: questionId },
     });
