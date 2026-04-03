@@ -43,109 +43,48 @@ export default function MentorshipPage() {
     };
 
     return (
-        <div className="nx-shell">
-            <div className="nx-frame min-h-[calc(100vh-1.5rem)] md:min-h-[calc(100vh-2.5rem)]">
-            {/* Header */}
-            <nav className="nx-topbar sticky top-3 z-50 md:top-5">
-                <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 text-black font-medium">
-                    <ArrowLeft size={20} />
-                    Back to Dashboard
-                </button>
-                <h1 className="text-2xl font-bold text-black">Expert Mentors</h1>
-                <button onClick={handleLogout} className="flex items-center gap-2 text-red-700 font-medium">
-                    <LogOut size={20} />
-                    Logout
-                </button>
-            </nav>
+        <div className="app-shell">
+            <div className="app-frame">
+                <nav className="app-nav">
+                    <button onClick={() => navigate('/dashboard')} className="btn btn-secondary"><ArrowLeft size={16} /> Back</button>
+                    <div className="app-brand">EXPERT MENTORS</div>
+                    <button onClick={handleLogout} className="btn btn-danger"><LogOut size={16} /> Logout</button>
+                </nav>
 
-            {/* Content */}
-            <div className="max-w-7xl mx-auto px-5 py-12 md:px-8">
-                <div className="mb-8">
-                    <h2 className="text-3xl font-bold text-black mb-2">Learn from Industry Experts</h2>
-                    <p className="text-gray-600">Get personalized guidance from experienced professionals</p>
-                </div>
-
-                {loading ? (
-                    <div className="text-center text-gray-700">Loading mentors...</div>
-                ) : mentors.length === 0 ? (
-                    <div className="text-center text-gray-700">No mentors available</div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {mentors.map((mentor) => (
-                            <div
-                                key={mentor.id}
-                                className="bg-white border border-gray-300 rounded-lg p-6 hover:border-black transition group"
-                            >
-                                {/* Verified Badge */}
-                                {mentor.isVerified && (
-                                    <div className="flex justify-end mb-2">
-                                        <span className="px-3 py-1 bg-green-100 border border-green-300 text-green-700 text-xs rounded-full font-medium">
-                                            ✓ Verified
-                                        </span>
-                                    </div>
-                                )}
-
-                                {/* Mentor Info */}
-                                <div className="mb-4">
-                                    <h3 className="text-xl font-bold text-black mb-1">
-                                        {mentor.firstName} {mentor.lastName}
-                                    </h3>
-                                    <div className="flex items-center gap-2 text-gray-600 text-sm mb-3">
-                                        <Briefcase size={16} className="text-black" />
-                                        <span>{mentor.designation}</span>
-                                    </div>
-                                    <p className="text-sm text-gray-700 font-medium">{mentor.company}</p>
-                                </div>
-
-                                {/* Bio */}
-                                {mentor.bio && (
-                                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">{mentor.bio}</p>
-                                )}
-
-                                {/* Stats */}
-                                <div className="grid grid-cols-2 gap-3 mb-4 py-4 border-t border-b border-gray-300">
-                                    <div>
-                                        <div className="text-lg font-bold text-black">{mentor.experience}+</div>
-                                        <div className="text-xs text-gray-600">Years Experience</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-lg font-bold text-black">₹{mentor.hourlyRate}/hr</div>
-                                        <div className="text-xs text-gray-600">Hourly Rate</div>
-                                    </div>
-                                </div>
-
-                                {/* Expertise */}
-                                <div className="mb-4">
-                                    <p className="text-xs text-gray-600 uppercase tracking-wide font-medium mb-2">Expertise</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {mentor.expertise?.slice(0, 3).map((skill) => (
-                                            <span
-                                                key={skill}
-                                                className="px-2 py-1 bg-gray-100 border border-gray-300 text-gray-800 text-xs rounded"
-                                            >
-                                                {skill}
-                                            </span>
-                                        ))}
-                                        {mentor.expertise?.length > 3 && (
-                                            <span className="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded font-medium">
-                                                +{mentor.expertise.length - 3}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Book Button */}
-                                <button
-                                    onClick={() => handleBookSession(mentor)}
-                                    className="w-full py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition"
-                                >
-                                    Book Session
-                                </button>
-                            </div>
-                        ))}
+                <main className="app-main">
+                    <div className="panel" style={{ marginBottom: 12 }}>
+                        <h2 style={{ marginTop: 0 }}>Learn from Industry Experts</h2>
+                        <p className="muted">Get personalized guidance from experienced professionals.</p>
                     </div>
-                )}
-            </div>
+
+                    {loading ? (
+                        <div className="panel">Loading mentors...</div>
+                    ) : mentors.length === 0 ? (
+                        <div className="panel">No mentors available</div>
+                    ) : (
+                        <div className="grid-3">
+                            {mentors.map((mentor) => (
+                                <div key={mentor.id} className="card">
+                                    {mentor.isVerified && <span className="badge">Verified</span>}
+                                    <h3>{mentor.firstName} {mentor.lastName}</h3>
+                                    <div className="muted" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        <Briefcase size={14} /> {mentor.designation}
+                                    </div>
+                                    <p className="muted">{mentor.company}</p>
+                                    {mentor.bio && <p className="muted">{mentor.bio}</p>}
+                                    <div className="grid-2">
+                                        <div className="card"><strong>{mentor.experience}+</strong><div className="muted">Years</div></div>
+                                        <div className="card"><strong>₹{mentor.hourlyRate}/hr</strong><div className="muted">Rate</div></div>
+                                    </div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+                                        {mentor.expertise?.slice(0, 3).map((skill) => <span key={skill} className="badge">{skill}</span>)}
+                                    </div>
+                                    <button onClick={() => handleBookSession(mentor)} className="btn btn-primary btn-block" style={{ marginTop: 10 }}>Book Session</button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </main>
             </div>
         </div>
     );

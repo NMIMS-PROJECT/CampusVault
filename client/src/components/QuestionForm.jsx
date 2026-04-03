@@ -64,11 +64,11 @@ export const QuestionForm = ({ onSubmit, isLoading = false }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <h2 className="text-xl font-semibold text-white">Post a Question</h2>
+        <form onSubmit={handleSubmit} className="stack">
+            <h2 style={{ margin: 0 }}>Post a Question</h2>
 
-            <div className="space-y-1">
-                <label htmlFor="title" className="text-sm text-slate-200">Title *</label>
+            <div className="stack" style={{ gap: 4 }}>
+                <label htmlFor="title">Title *</label>
                 <input
                     type="text"
                     id="title"
@@ -76,13 +76,13 @@ export const QuestionForm = ({ onSubmit, isLoading = false }) => {
                     value={formData.title}
                     onChange={handleChange}
                     placeholder="What's your question?"
-                    className="w-full rounded-xl border border-white/20 bg-black/25 px-4 py-3 text-slate-100 placeholder:text-slate-400 focus:border-cyan-300/70 focus:outline-none"
+                    className="field"
                     required
                 />
             </div>
 
-            <div className="space-y-1">
-                <label htmlFor="company" className="text-sm text-slate-200">Company *</label>
+            <div className="stack" style={{ gap: 4 }}>
+                <label htmlFor="company">Company *</label>
                 <input
                     type="text"
                     id="company"
@@ -90,35 +90,35 @@ export const QuestionForm = ({ onSubmit, isLoading = false }) => {
                     value={formData.company}
                     onChange={handleChange}
                     placeholder="e.g., Google, Microsoft, Amazon"
-                    className="w-full rounded-xl border border-white/20 bg-black/25 px-4 py-3 text-slate-100 placeholder:text-slate-400 focus:border-cyan-300/70 focus:outline-none"
+                    className="field"
                     required
                 />
             </div>
 
-            <div className="space-y-1">
-                <label htmlFor="text" className="text-sm text-slate-200">Question Details *</label>
+            <div className="stack" style={{ gap: 4 }}>
+                <label htmlFor="text">Question Details *</label>
                 <textarea
                     id="text"
                     name="text"
                     value={formData.text}
                     onChange={handleChange}
                     placeholder="Provide details about your question..."
-                    rows={6}
-                    className="w-full rounded-xl border border-white/20 bg-black/25 px-4 py-3 text-slate-100 placeholder:text-slate-400 focus:border-cyan-300/70 focus:outline-none"
+                    rows={5}
+                    className="textarea"
                     required
                 />
             </div>
 
-            <div className="rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-sm text-slate-100">
+            <div className="card">
                 <label className="flex items-center gap-2">
-                    <input type="checkbox" name="isPaid" checked={formData.isPaid} onChange={handleChange} className="h-4 w-4 accent-cyan-400" />
+                    <input type="checkbox" name="isPaid" checked={formData.isPaid} onChange={handleChange} />
                     <span>This is a paid question</span>
                 </label>
             </div>
 
             {formData.isPaid && (
-                <div className="space-y-1">
-                    <label htmlFor="cost" className="text-sm text-slate-200">Cost (Credits) *</label>
+                <div className="stack" style={{ gap: 4 }}>
+                    <label htmlFor="cost">Cost (Credits) *</label>
                     <input
                         type="number"
                         id="cost"
@@ -127,15 +127,15 @@ export const QuestionForm = ({ onSubmit, isLoading = false }) => {
                         onChange={handleChange}
                         placeholder="e.g., 50"
                         min="1"
-                        className="w-full rounded-xl border border-white/20 bg-black/25 px-4 py-3 text-slate-100 placeholder:text-slate-400 focus:border-cyan-300/70 focus:outline-none"
+                        className="field"
                         required
                     />
                 </div>
             )}
 
-            {error && <div className="rounded-xl border border-rose-400/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</div>}
+            {error && <div className="card" style={{ borderColor: 'rgba(154,47,47,0.35)', color: '#8b2f2f' }}>{error}</div>}
 
-            <button type="submit" disabled={isLoading} className="rounded-xl bg-cyan-400 px-5 py-3 font-medium text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:bg-slate-500">
+            <button type="submit" disabled={isLoading} className="btn btn-primary btn-block">
                 {isLoading ? 'Posting...' : 'Post Question'}
             </button>
         </form>

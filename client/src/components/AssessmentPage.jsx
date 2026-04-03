@@ -99,124 +99,72 @@ export default function AssessmentPage() {
     };
 
     return (
-        <div className="nx-shell">
-            <div className="nx-frame min-h-[calc(100vh-1.5rem)] md:min-h-[calc(100vh-2.5rem)]">
-            {/* Header */}
-            <nav className="nx-topbar sticky top-3 z-50 md:top-5">
-                <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 text-black font-medium">
-                    <ArrowLeft size={20} />
-                    Back
-                </button>
-                <h1 className="text-2xl font-bold text-black">Skill Assessment</h1>
-                <button onClick={handleLogout} className="flex items-center gap-2 text-red-700 font-medium">
-                    <LogOut size={20} />
-                    Logout
-                </button>
-            </nav>
+        <div className="app-shell">
+            <div className="app-frame">
+                <nav className="app-nav">
+                    <button onClick={() => navigate('/dashboard')} className="btn btn-secondary"><ArrowLeft size={16} /> Back</button>
+                    <div className="app-brand">SKILL ASSESSMENT</div>
+                    <button onClick={handleLogout} className="btn btn-danger"><LogOut size={16} /> Logout</button>
+                </nav>
 
-            {/* Content */}
-            <div className="max-w-2xl mx-auto px-5 py-12 md:px-8">
-                {!submitted ? (
-                    <div className="bg-gray-50 border border-gray-300 rounded-lg p-8">
-                        {/* Progress */}
-                        <div className="mb-8">
-                            <div className="flex justify-between items-center mb-2">
-                                <h2 className="text-lg font-bold text-black">Question {currentQuestion + 1}/{assessmentQuestions.length}</h2>
-                                <span className="text-sm text-gray-600">{Math.round(((currentQuestion + 1) / assessmentQuestions.length) * 100)}%</span>
+                <main className="app-main" style={{ maxWidth: 900 }}>
+                    {!submitted ? (
+                        <div className="panel">
+                            <div style={{ marginBottom: 14 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <h2 style={{ margin: 0 }}>Question {currentQuestion + 1}/{assessmentQuestions.length}</h2>
+                                    <span className="muted">{Math.round(((currentQuestion + 1) / assessmentQuestions.length) * 100)}%</span>
+                                </div>
+                                <div style={{ width: '100%', background: '#d8e7e2', borderRadius: 999, height: 8, marginTop: 8 }}>
+                                    <div style={{ width: `${((currentQuestion + 1) / assessmentQuestions.length) * 100}%`, background: 'var(--accent)', height: 8, borderRadius: 999 }} />
+                                </div>
                             </div>
-                            <div className="w-full bg-gray-300 rounded-full h-2">
-                                <div
-                                    className="bg-black h-2 rounded-full transition-all"
-                                    style={{ width: `${((currentQuestion + 1) / assessmentQuestions.length) * 100}%` }}
-                                />
-                            </div>
-                        </div>
 
-                        {/* Question */}
-                        <div className="mb-8">
-                            <h3 className="text-xl font-semibold text-black mb-6">
-                                {assessmentQuestions[currentQuestion].question}
-                            </h3>
-
-                            {/* Options */}
-                            <div className="space-y-3">
+                            <h3>{assessmentQuestions[currentQuestion].question}</h3>
+                            <div className="stack">
                                 {assessmentQuestions[currentQuestion].options.map((option, idx) => (
                                     <button
                                         key={idx}
                                         onClick={() => handleAnswer(idx)}
-                                        className={`w-full p-4 rounded-lg border-2 transition text-left ${
-                                            answers[currentQuestion] === idx
-                                                ? 'border-black bg-gray-200 text-black font-medium'
-                                                : 'border-gray-300 bg-white text-gray-800 hover:border-gray-400'
-                                        }`}
+                                        className="btn btn-secondary"
+                                        style={{ borderRadius: 12, textAlign: 'left', background: answers[currentQuestion] === idx ? 'rgba(0,122,100,0.13)' : '#fff' }}
+                                        type="button"
                                     >
-                                        <span className="font-semibold">{String.fromCharCode(65 + idx)}.</span> {option}
+                                        <strong>{String.fromCharCode(65 + idx)}.</strong> {option}
                                     </button>
                                 ))}
                             </div>
-                        </div>
 
-                        {/* Navigation */}
-                        <div className="flex justify-between gap-4">
-                            <button
-                                onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
-                                disabled={currentQuestion === 0}
-                                className="px-6 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                            >
-                                Previous
-                            </button>
-
-                            {currentQuestion === assessmentQuestions.length - 1 ? (
-                                <button
-                                    onClick={handleSubmit}
-                                    className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-medium"
-                                >
-                                    Submit Assessment
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={() => setCurrentQuestion(currentQuestion + 1)}
-                                    className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-medium"
-                                >
-                                    Next
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                ) : (
-                    // Results
-                    <div className="bg-gray-50 border border-gray-300 rounded-lg p-12 text-center">
-                        <h2 className="text-3xl font-bold text-black mb-2">Assessment Complete! 🎉</h2>
-                        <p className="text-gray-600 mb-8">Here's your performance summary</p>
-
-                        <div className="bg-white border border-gray-300 rounded-lg p-8 mb-8">
-                            <div className="text-5xl font-bold text-black mb-2">{score}%</div>
-                            <p className="text-gray-700 mb-4">Your Score</p>
-                            <div className="w-full bg-gray-300 rounded-full h-3 mb-6">
-                                <div className="bg-black h-3 rounded-full" style={{ width: `${score}%` }} />
-                            </div>
-
-                            <div className="text-2xl font-bold text-black mb-2">{skillCategory}</div>
-                            <p className="text-gray-600 mb-6">Your Skill Level</p>
-
-                            <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 text-sm text-gray-700">
-                                {score >= 80
-                                    ? 'Excellent! You are ready for advanced interviews.'
-                                    : score >= 60
-                                    ? 'Good! You are interview-ready. Keep practicing!'
-                                    : 'Keep practicing! Review the basics and retake the assessment.'}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 14 }}>
+                                <button onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))} disabled={currentQuestion === 0} className="btn btn-secondary" type="button">Previous</button>
+                                {currentQuestion === assessmentQuestions.length - 1 ? (
+                                    <button onClick={handleSubmit} className="btn btn-primary" type="button">Submit Assessment</button>
+                                ) : (
+                                    <button onClick={() => setCurrentQuestion(currentQuestion + 1)} className="btn btn-primary" type="button">Next</button>
+                                )}
                             </div>
                         </div>
-
-                        <button
-                            onClick={() => navigate('/dashboard')}
-                            className="w-full py-3 bg-black text-white rounded-lg hover:bg-gray-800 font-medium"
-                        >
-                            Back to Dashboard
-                        </button>
-                    </div>
-                )}
-            </div>
+                    ) : (
+                        <div className="panel" style={{ textAlign: 'center' }}>
+                            <h2 style={{ marginTop: 0 }}>Assessment Complete</h2>
+                            <div className="card" style={{ marginBottom: 12 }}>
+                                <div style={{ fontSize: 48, fontWeight: 700 }}>{score}%</div>
+                                <p className="muted">Your Score</p>
+                                <div className="card">
+                                    <strong>{skillCategory}</strong>
+                                    <p className="muted">
+                                        {score >= 80
+                                            ? 'Excellent! You are ready for advanced interviews.'
+                                            : score >= 60
+                                            ? 'Good! You are interview-ready. Keep practicing!'
+                                            : 'Keep practicing! Review the basics and retake the assessment.'}
+                                    </p>
+                                </div>
+                            </div>
+                            <button onClick={() => navigate('/dashboard')} className="btn btn-primary btn-block" type="button">Back to Dashboard</button>
+                        </div>
+                    )}
+                </main>
             </div>
         </div>
     );

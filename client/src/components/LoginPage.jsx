@@ -53,103 +53,43 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="nx-shell">
-            <div className="nx-frame min-h-[calc(100vh-2.5rem)]">
-                <nav className="nx-topbar">
-                    <h1 className="nx-logo">CAMPUSVAULT</h1>
-                    <button onClick={() => navigate('/')} className="nx-pill-light">
-                        Back
-                    </button>
+        <div className="app-shell">
+            <div className="app-frame">
+                <nav className="app-nav">
+                    <div className="app-brand">CAMPUSVAULT</div>
+                    <button onClick={() => navigate('/')} className="btn btn-secondary">Back</button>
                 </nav>
-
-                <div className="mx-auto grid min-h-[74vh] max-w-6xl gap-6 px-5 pb-10 pt-10 md:px-8 lg:grid-cols-[1.15fr_0.85fr]">
-                    <section className="nx-reveal nx-glass rounded-3xl p-6 md:p-10">
-                        <p className="inline-flex items-center gap-2 rounded-full border border-[#16385f]/15 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#16385f]">
-                            <Target size={14} /> Placement Command Center
-                        </p>
-                        <h2 className="nx-heading mt-5 text-[54px] md:text-[88px]">WELCOME BACK</h2>
-                        <p className="max-w-xl text-base text-[#16385f]/78 md:text-lg">
-                            Continue your preparation streak, review company trends, and sharpen your interview edge in one dashboard.
-                        </p>
-                        <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                            <div className="rounded-2xl border border-[#16385f]/12 bg-white/80 p-4">
-                                <ShieldCheck size={18} className="text-[#174d86]" />
-                                <p className="mt-2 text-xs font-semibold uppercase text-[#16385f]/60">Secure Auth</p>
-                                <p className="text-lg font-extrabold text-[#0f2b4d]">Firebase</p>
-                            </div>
-                            <div className="rounded-2xl border border-[#16385f]/12 bg-white/80 p-4">
-                                <Zap size={18} className="text-[#174d86]" />
-                                <p className="mt-2 text-xs font-semibold uppercase text-[#16385f]/60">Daily Drills</p>
-                                <p className="text-lg font-extrabold text-[#0f2b4d]">Adaptive</p>
-                            </div>
-                            <div className="rounded-2xl border border-[#16385f]/12 bg-white/80 p-4">
-                                <ArrowRight size={18} className="text-[#174d86]" />
-                                <p className="mt-2 text-xs font-semibold uppercase text-[#16385f]/60">Career Move</p>
-                                <p className="text-lg font-extrabold text-[#0f2b4d]">Placement</p>
-                            </div>
+                <main className="app-main grid-2">
+                    <section className="panel fade-up">
+                        <p className="badge"><Target size={14} /> Placement Command Center</p>
+                        <h1 className="hero-title" style={{ marginTop: 12 }}>WELCOME BACK</h1>
+                        <p className="muted">Continue your preparation streak with company insights, skill checks, and forum learning.</p>
+                        <div className="grid-3 compact-top">
+                            <div className="card"><ShieldCheck size={16} /><p>Secure Auth</p></div>
+                            <div className="card"><Zap size={16} /><p>Daily Drills</p></div>
+                            <div className="card"><ArrowRight size={16} /><p>Career Focus</p></div>
                         </div>
                     </section>
 
-                    <section className="nx-reveal-delay-1 rounded-3xl border border-[#16385f]/15 bg-white/90 p-6 md:p-8">
-                        <h3 className="nx-heading text-4xl">Sign In</h3>
-                        <p className="mt-1 text-sm text-[#16385f]/70">Access your prep progress and opportunities.</p>
-
-                        {error && (
-                            <div className="mt-5 rounded-2xl border border-red-200 bg-white p-4">
-                                <p className="text-sm text-red-700">{error}</p>
-                            </div>
-                        )}
-
-                        <form onSubmit={handleSubmit} className="mt-5 space-y-5">
-                            <div>
-                                <label className="mb-2 block text-sm font-semibold text-[#0f2b4d]">Email Address</label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    required
-                                    disabled={isLoading}
-                                    className="w-full rounded-2xl border border-[#16385f]/20 bg-white px-4 py-3 text-[#0f2b4d] placeholder-[#16385f]/45 transition focus:border-[#174d86] focus:outline-none focus:ring-2 focus:ring-[#174d86] disabled:opacity-50"
-                                    placeholder="your@email.com"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="mb-2 block text-sm font-semibold text-[#0f2b4d]">Password</label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required
-                                    disabled={isLoading}
-                                    className="w-full rounded-2xl border border-[#16385f]/20 bg-white px-4 py-3 text-[#0f2b4d] placeholder-[#16385f]/45 transition focus:border-[#174d86] focus:outline-none focus:ring-2 focus:ring-[#174d86] disabled:opacity-50"
-                                    placeholder="••••••••"
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="nx-pill mt-2 w-full justify-center py-3 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                {isLoading ? 'Signing in...' : 'Enter Dashboard'}
-                            </button>
-
-                            <div className="text-center text-sm text-[#16385f]/78">
-                                Don&apos;t have an account?{' '}
-                                <button
-                                    type="button"
-                                    onClick={() => navigate('/register')}
-                                    className="font-semibold text-[#0f2b4d] hover:underline"
-                                >
-                                    Create one
-                                </button>
+                    <section className="panel fade-delay">
+                        <h2 style={{ marginTop: 0 }}>Sign In</h2>
+                        {error && <div className="card" style={{ borderColor: 'rgba(154,47,47,0.35)', color: '#8b2f2f' }}>{error}</div>}
+                        <form onSubmit={handleSubmit} className="stack compact-top">
+                            <label>
+                                Email Address
+                                <input type="email" name="email" value={formData.email} onChange={handleChange} required disabled={isLoading} className="field" placeholder="your@email.com" />
+                            </label>
+                            <label>
+                                Password
+                                <input type="password" name="password" value={formData.password} onChange={handleChange} required disabled={isLoading} className="field" placeholder="********" />
+                            </label>
+                            <button type="submit" disabled={isLoading} className="btn btn-primary btn-block">{isLoading ? 'Signing in...' : 'Enter Dashboard'}</button>
+                            <div className="muted" style={{ textAlign: 'center' }}>
+                                Don&apos;t have an account? <button type="button" onClick={() => navigate('/register')} className="btn btn-secondary" style={{ padding: '6px 10px' }}>Create one</button>
                             </div>
                         </form>
                     </section>
-                </div>
+                </main>
             </div>
         </div>
     );

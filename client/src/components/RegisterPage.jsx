@@ -86,226 +86,63 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="nx-shell">
-            <div className="nx-frame min-h-[calc(100vh-1.5rem)] md:min-h-[calc(100vh-2.5rem)]">
-                <nav className="nx-topbar">
-                    <h1 className="nx-logo">CAMPUSVAULT</h1>
-                    <button onClick={() => navigate('/')} className="nx-pill-light">
-                        Back
-                    </button>
+        <div className="app-shell">
+            <div className="app-frame">
+                <nav className="app-nav">
+                    <div className="app-brand">CAMPUSVAULT</div>
+                    <button onClick={() => navigate('/')} className="btn btn-secondary">Back</button>
                 </nav>
 
-                <div className="mx-auto grid max-w-6xl gap-6 px-5 py-10 md:px-8 md:py-12 lg:grid-cols-[0.85fr_1.15fr]">
-                    <section className="nx-reveal nx-glass rounded-3xl p-6 md:p-8">
-                        <h2 className="nx-heading text-[64px] md:text-[80px]">JOIN THE
-                            <span className="nx-gradient-text"> BATCH</span>
-                        </h2>
-                        <p className="mt-2 text-sm text-[#16385f]/78 md:text-base">
-                            Build your placement profile once, then unlock company matching, skill tracks, and community Q&A.
-                        </p>
-
-                        <div className="mt-6 space-y-3">
-                            <div className="rounded-2xl border border-[#16385f]/12 bg-white/80 p-4">
-                                <div className="flex items-center gap-3">
-                                    <GraduationCap size={18} className="text-[#174d86]" />
-                                    <p className="text-sm font-semibold text-[#0f2b4d]">Academic profile mapping</p>
-                                </div>
-                            </div>
-                            <div className="rounded-2xl border border-[#16385f]/12 bg-white/80 p-4">
-                                <div className="flex items-center gap-3">
-                                    <Building2 size={18} className="text-[#174d86]" />
-                                    <p className="text-sm font-semibold text-[#0f2b4d]">Eligible company discovery</p>
-                                </div>
-                            </div>
-                            <div className="rounded-2xl border border-[#16385f]/12 bg-white/80 p-4">
-                                <div className="flex items-center gap-3">
-                                    <FileText size={18} className="text-[#174d86]" />
-                                    <p className="text-sm font-semibold text-[#0f2b4d]">Interview preparation feed</p>
-                                </div>
-                            </div>
-                            <div className="rounded-2xl border border-[#16385f]/12 bg-white/80 p-4">
-                                <div className="flex items-center gap-3">
-                                    <BadgeCheck size={18} className="text-[#174d86]" />
-                                    <p className="text-sm font-semibold text-[#0f2b4d]">Skill assessment and credibility score</p>
-                                </div>
-                            </div>
+                <main className="app-main grid-2">
+                    <section className="panel fade-up">
+                        <h1 className="hero-title">JOIN THE BATCH</h1>
+                        <p className="muted">Build your profile once and unlock matching, assessments, and community guidance.</p>
+                        <div className="stack compact-top">
+                            <div className="card"><GraduationCap size={16} /> Academic profile mapping</div>
+                            <div className="card"><Building2 size={16} /> Eligible company discovery</div>
+                            <div className="card"><FileText size={16} /> Interview question feed</div>
+                            <div className="card"><BadgeCheck size={16} /> Readiness validation</div>
                         </div>
                     </section>
 
-                    <section className="nx-reveal-delay-1 rounded-3xl border border-[#16385f]/15 bg-white/92 p-6 md:p-8">
-                        <div className="mb-6">
-                            <h3 className="nx-heading text-5xl">Create Account</h3>
-                            <p className="text-[#16385f]/70">Set up your student profile to begin your placement journey.</p>
-                        </div>
-
-                        {error && (
-                            <div className="mb-6 rounded-2xl border border-red-200 bg-white p-4">
-                                <p className="text-sm text-red-700">{error}</p>
+                    <section className="panel fade-delay">
+                        <h2 style={{ marginTop: 0 }}>Create Account</h2>
+                        {error && <div className="card" style={{ borderColor: 'rgba(154,47,47,0.35)', color: '#8b2f2f' }}>{error}</div>}
+                        <form onSubmit={handleSubmit} className="stack compact-top">
+                            <div className="grid-2">
+                                <label>First Name<input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required disabled={isLoading} className="field" /></label>
+                                <label>Last Name<input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required disabled={isLoading} className="field" /></label>
                             </div>
-                        )}
-
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div>
-                                <label className="mb-2 block text-sm font-semibold text-[#0f2b4d]">First Name</label>
-                                <input
-                                    type="text"
-                                    name="firstName"
-                                    value={formData.firstName}
-                                    onChange={handleChange}
-                                    required
-                                    disabled={isLoading}
-                                    className="w-full rounded-2xl border border-[#16385f]/20 bg-white px-4 py-3 text-[#0f2b4d] placeholder-[#16385f]/45 transition focus:border-[#174d86] focus:outline-none focus:ring-2 focus:ring-[#174d86] disabled:opacity-50"
-                                    placeholder="John"
-                                />
+                            <label>Email Address<input type="email" name="email" value={formData.email} onChange={handleChange} required disabled={isLoading} className="field" /></label>
+                            <label>Phone Number<input type="tel" name="phone" value={formData.phone} onChange={handleChange} required disabled={isLoading} className="field" /></label>
+                            <div className="grid-2">
+                                <label>College Name<input type="text" name="college" value={formData.college} onChange={handleChange} required disabled={isLoading} className="field" /></label>
+                                <label>Branch/Department
+                                    <select name="branch" value={formData.branch} onChange={handleChange} required disabled={isLoading} className="select">
+                                        <option value="">Select Branch</option>
+                                        <option value="CSE">Computer Science</option>
+                                        <option value="ECE">Electronics & Communication</option>
+                                        <option value="ME">Mechanical Engineering</option>
+                                        <option value="CE">Civil Engineering</option>
+                                        <option value="EE">Electrical Engineering</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </label>
                             </div>
-                            <div>
-                                <label className="mb-2 block text-sm font-semibold text-[#0f2b4d]">Last Name</label>
-                                <input
-                                    type="text"
-                                    name="lastName"
-                                    value={formData.lastName}
-                                    onChange={handleChange}
-                                    required
-                                    disabled={isLoading}
-                                    className="w-full rounded-2xl border border-[#16385f]/20 bg-white px-4 py-3 text-[#0f2b4d] placeholder-[#16385f]/45 transition focus:border-[#174d86] focus:outline-none focus:ring-2 focus:ring-[#174d86] disabled:opacity-50"
-                                    placeholder="Doe"
-                                />
+                            <label>CGPA<input type="number" name="cgpa" value={formData.cgpa} onChange={handleChange} required min="0" max="10" step="0.01" disabled={isLoading} className="field" /></label>
+                            <div className="grid-2">
+                                <label>Password<input type="password" name="password" value={formData.password} onChange={handleChange} required disabled={isLoading} className="field" /></label>
+                                <label>Confirm Password<input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required disabled={isLoading} className="field" /></label>
                             </div>
-                        </div>
-
-                        <div>
-                            <label className="mb-2 block text-sm font-semibold text-[#0f2b4d]">Email Address</label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                                disabled={isLoading}
-                                className="w-full rounded-2xl border border-[#16385f]/20 bg-white px-4 py-3 text-[#0f2b4d] placeholder-[#16385f]/45 transition focus:border-[#174d86] focus:outline-none focus:ring-2 focus:ring-[#174d86] disabled:opacity-50"
-                                placeholder="john@example.com"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="mb-2 block text-sm font-semibold text-[#0f2b4d]">Phone Number</label>
-                            <input
-                                type="tel"
-                                name="phone"
-                                value={formData.phone}
-                                onChange={handleChange}
-                                required
-                                disabled={isLoading}
-                                className="w-full rounded-2xl border border-[#16385f]/20 bg-white px-4 py-3 text-[#0f2b4d] placeholder-[#16385f]/45 transition focus:border-[#174d86] focus:outline-none focus:ring-2 focus:ring-[#174d86] disabled:opacity-50"
-                                placeholder="+91 9876543210"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div>
-                                <label className="mb-2 block text-sm font-semibold text-[#0f2b4d]">College Name</label>
-                                <input
-                                    type="text"
-                                    name="college"
-                                    value={formData.college}
-                                    onChange={handleChange}
-                                    required
-                                    disabled={isLoading}
-                                    className="w-full rounded-2xl border border-[#16385f]/20 bg-white px-4 py-3 text-[#0f2b4d] placeholder-[#16385f]/45 transition focus:border-[#174d86] focus:outline-none focus:ring-2 focus:ring-[#174d86] disabled:opacity-50"
-                                    placeholder="Your College"
-                                />
-                            </div>
-                            <div>
-                                <label className="mb-2 block text-sm font-semibold text-[#0f2b4d]">Branch/Department</label>
-                                <select
-                                    name="branch"
-                                    value={formData.branch}
-                                    onChange={handleChange}
-                                    required
-                                    disabled={isLoading}
-                                    className="w-full rounded-2xl border border-[#16385f]/20 bg-white px-4 py-3 text-[#0f2b4d] transition focus:border-[#174d86] focus:outline-none focus:ring-2 focus:ring-[#174d86] disabled:opacity-50"
-                                >
-                                    <option value="">Select Branch</option>
-                                    <option value="CSE">Computer Science</option>
-                                    <option value="ECE">Electronics & Communication</option>
-                                    <option value="ME">Mechanical Engineering</option>
-                                    <option value="CE">Civil Engineering</option>
-                                    <option value="EE">Electrical Engineering</option>
-                                    <option value="OTHER">Other</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="mb-2 block text-sm font-semibold text-[#0f2b4d]">CGPA (Current)</label>
-                            <input
-                                type="number"
-                                name="cgpa"
-                                value={formData.cgpa}
-                                onChange={handleChange}
-                                required
-                                min="0"
-                                max="10"
-                                step="0.01"
-                                disabled={isLoading}
-                                className="w-full rounded-2xl border border-[#16385f]/20 bg-white px-4 py-3 text-[#0f2b4d] placeholder-[#16385f]/45 transition focus:border-[#174d86] focus:outline-none focus:ring-2 focus:ring-[#174d86] disabled:opacity-50"
-                                placeholder="7.5"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div>
-                                <label className="mb-2 block text-sm font-semibold text-[#0f2b4d]">Password</label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required
-                                    disabled={isLoading}
-                                    className="w-full rounded-2xl border border-[#16385f]/20 bg-white px-4 py-3 text-[#0f2b4d] placeholder-[#16385f]/45 transition focus:border-[#174d86] focus:outline-none focus:ring-2 focus:ring-[#174d86] disabled:opacity-50"
-                                    placeholder="••••••••"
-                                />
-                            </div>
-                            <div>
-                                <label className="mb-2 block text-sm font-semibold text-[#0f2b4d]">Confirm Password</label>
-                                <input
-                                    type="password"
-                                    name="confirmPassword"
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    required
-                                    disabled={isLoading}
-                                    className="w-full rounded-2xl border border-[#16385f]/20 bg-white px-4 py-3 text-[#0f2b4d] placeholder-[#16385f]/45 transition focus:border-[#174d86] focus:outline-none focus:ring-2 focus:ring-[#174d86] disabled:opacity-50"
-                                    placeholder="••••••••"
-                                />
-                            </div>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="nx-pill mt-6 w-full justify-center py-3 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            {isLoading ? 'Creating account...' : (
-                                <span className="inline-flex items-center gap-2">Create Account <ArrowRight size={16} /></span>
-                            )}
-                        </button>
-
-                        <div className="text-center text-sm text-[#16385f]/78">
-                            Already have an account?{' '}
-                            <button
-                                type="button"
-                                onClick={() => navigate('/login')}
-                                className="font-semibold text-[#0f2b4d] hover:underline"
-                            >
-                                Sign in
+                            <button type="submit" disabled={isLoading} className="btn btn-primary btn-block">
+                                {isLoading ? 'Creating account...' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>Create Account <ArrowRight size={15} /></span>}
                             </button>
-                        </div>
-                    </form>
+                            <div className="muted" style={{ textAlign: 'center' }}>
+                                Already have an account? <button type="button" onClick={() => navigate('/login')} className="btn btn-secondary" style={{ padding: '6px 10px' }}>Sign in</button>
+                            </div>
+                        </form>
                     </section>
-                </div>
+                </main>
             </div>
         </div>
     );

@@ -25,36 +25,36 @@ export const QuestionCard = ({ question, currentUserId, hasPurchased = false, on
     };
 
     return (
-        <div className="rounded-2xl border border-white/20 bg-black/20 p-5 backdrop-blur-lg">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-                <h3 className="text-lg font-semibold text-white">{question.title}</h3>
-                <span className="rounded-full border border-cyan-300/40 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-100">{question.company}</span>
+        <div className="card">
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 8 }}>
+                <h3 style={{ margin: 0 }}>{question.title}</h3>
+                <span className="badge">{question.company}</span>
             </div>
 
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-300">
+            <div className="muted" style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 10, fontSize: 12 }}>
                 <span>By {question.author.firstName} {question.author.lastName}</span>
                 <span>{formatDate(question.createdAt)}</span>
-                {question.isPaid && <span className="rounded-full border border-amber-300/40 bg-amber-500/10 px-2 py-1 text-amber-100">{question.cost} Credits</span>}
+                {question.isPaid && <span className="badge">{question.cost} Credits</span>}
             </div>
 
-            <div className="mt-4 space-y-4">
-                <div className="rounded-xl border border-white/15 bg-white/5 p-4">
+            <div className="stack compact-top">
+                <div className="card">
                     <p>{question.text}</p>
                 </div>
 
                 {question.answer && (
-                    <div className={`relative rounded-xl border border-white/20 bg-slate-900/55 p-4 ${isBlurred ? 'overflow-hidden' : ''}`}>
-                        <h4 className="mb-2 font-semibold text-cyan-100">Answer:</h4>
+                    <div className="card" style={{ position: 'relative', overflow: isBlurred ? 'hidden' : 'visible' }}>
+                        <h4 style={{ margin: '0 0 8px 0' }}>Answer:</h4>
                         <p>{question.answer}</p>
 
                         {isBlurred && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm">
-                                <div className="rounded-xl border border-white/20 bg-white/10 p-4 text-center">
+                            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(13,42,43,0.72)' }}>
+                                <div className="card" style={{ textAlign: 'center' }}>
                                     <p>Answer is locked</p>
                                     <button
                                         onClick={handleUnlock}
                                         disabled={isLoadingPurchase || isAuthor}
-                                        className="mt-2 rounded-lg bg-cyan-400 px-3 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:bg-slate-500"
+                                        className="btn btn-primary"
                                         title={isAuthor ? 'You cannot purchase your own question' : 'Click to unlock'}
                                     >
                                         {isLoadingPurchase ? 'Unlocking...' : `Unlock for ${question.cost} Credits`}
@@ -66,9 +66,9 @@ export const QuestionCard = ({ question, currentUserId, hasPurchased = false, on
                 )}
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-300">
+            <div className="muted" style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
                 <span>{question.purchases.length} person{question.purchases.length !== 1 ? 's' : ''} purchased</span>
-                {isAuthor && <span className="rounded-full border border-emerald-300/40 bg-emerald-500/10 px-2 py-1 text-emerald-100">You are the author</span>}
+                {isAuthor && <span className="badge">You are the author</span>}
             </div>
         </div>
     );

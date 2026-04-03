@@ -93,112 +93,68 @@ export default function DashboardPage() {
     ];
 
     return (
-        <div className="nx-shell">
-            <div className="nx-frame min-h-[calc(100vh-2.5rem)]">
-                <nav className="nx-topbar sticky top-3 z-50 md:top-5">
+        <div className="app-shell">
+            <div className="app-frame">
+                <nav className="app-nav">
                     <div>
-                        <h1 className="nx-logo">CAMPUSVAULT</h1>
-                        <p className="mt-1 text-xs uppercase tracking-wide text-[#16385f]/62">Placement Command Center</p>
+                        <div className="app-brand">CAMPUSVAULT</div>
+                        <div className="muted" style={{ fontSize: 12 }}>Placement Command Center</div>
                     </div>
-                    <button
-                        onClick={handleLogout}
-                        className="inline-flex items-center gap-2 rounded-full border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100"
-                    >
-                        <LogOut size={16} />
-                        Logout
-                    </button>
+                    <button onClick={handleLogout} className="btn btn-danger" type="button"><LogOut size={15} /> Logout</button>
                 </nav>
 
-                <div className="max-w-7xl mx-auto px-5 py-10 space-y-10 md:px-8 md:py-12">
-                    <section className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
-                        <div className="nx-reveal nx-glass rounded-3xl p-6 md:p-8">
-                            <p className="inline-flex items-center gap-2 rounded-full border border-[#16385f]/14 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#15385f]">
-                                <Rocket size={14} /> Active Preparation Window
-                            </p>
-                            <h2 className="nx-heading mt-4 text-[56px] md:text-[88px]">READY, {userName?.toUpperCase()}?</h2>
-                            <p className="max-w-2xl text-base text-[#16385f]/76 md:text-lg">
-                                This is your live placement cockpit. Prioritize interviews, close skill gaps, and move from preparation to offer conversion.
-                            </p>
-                            <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                                <div className="rounded-2xl border border-[#16385f]/12 bg-white/80 p-4">
-                                    <p className="text-xs font-semibold uppercase text-[#16385f]/60">Weekly Focus</p>
-                                    <p className="mt-2 text-lg font-extrabold text-[#0f2b4d]">Aptitude + DSA</p>
-                                </div>
-                                <div className="rounded-2xl border border-[#16385f]/12 bg-white/80 p-4">
-                                    <p className="text-xs font-semibold uppercase text-[#16385f]/60">Top Signal</p>
-                                    <p className="mt-2 text-lg font-extrabold text-[#0f2b4d]">Mock Interview</p>
-                                </div>
-                                <div className="rounded-2xl border border-[#16385f]/12 bg-white/80 p-4">
-                                    <p className="text-xs font-semibold uppercase text-[#16385f]/60">Career Goal</p>
-                                    <p className="mt-2 text-lg font-extrabold text-[#0f2b4d]">SDE Role</p>
-                                </div>
+                <main className="app-main">
+                    <section className="grid-2">
+                        <div className="panel fade-up">
+                            <p className="badge"><Rocket size={12} /> Active Preparation Window</p>
+                            <h1 className="hero-title" style={{ marginTop: 10 }}>READY, {userName?.toUpperCase()}?</h1>
+                            <p className="muted">Prioritize interviews, close skill gaps, and move from preparation to offers.</p>
+                            <div className="grid-3 compact-top">
+                                <div className="card"><strong>Weekly Focus</strong><div className="muted">Aptitude + DSA</div></div>
+                                <div className="card"><strong>Top Signal</strong><div className="muted">Mock Interview</div></div>
+                                <div className="card"><strong>Career Goal</strong><div className="muted">SDE Role</div></div>
                             </div>
                         </div>
 
-                        <div className="nx-reveal-delay-1 rounded-3xl border border-[#16385f]/12 bg-white/90 p-6">
-                            <h3 className="text-xl font-extrabold text-[#0f2b4d]">Preparation Pulse</h3>
-                            <div className="mt-4 space-y-3">
-                                <div className="rounded-2xl bg-[#edf4ff] p-4">
-                                    <p className="text-xs font-semibold uppercase text-[#18447a]/65">Momentum</p>
-                                    <p className="mt-1 text-2xl font-black text-[#0f2b4d]">Strong</p>
-                                </div>
-                                <div className="rounded-2xl bg-[#e9f8f7] p-4">
-                                    <p className="text-xs font-semibold uppercase text-[#0f6f6b]/65">Interview Readiness</p>
-                                    <p className="mt-1 text-2xl font-black text-[#0f2b4d]">Growing</p>
-                                </div>
-                                <button
-                                    onClick={() => navigate('/assessment')}
-                                    className="nx-pill mt-1 w-full justify-center"
-                                >
-                                    Run Skill Check <ArrowUpRight size={16} />
-                                </button>
+                        <div className="panel fade-delay">
+                            <h3 style={{ marginTop: 0 }}>Preparation Pulse</h3>
+                            <div className="stack">
+                                <div className="card"><strong>Momentum:</strong> Strong</div>
+                                <div className="card"><strong>Interview Readiness:</strong> Growing</div>
+                                <button onClick={() => navigate('/assessment')} className="btn btn-primary btn-block" type="button">Run Skill Check <ArrowUpRight size={15} /></button>
                             </div>
                         </div>
                     </section>
 
-                    <section>
-                        <h3 className="nx-heading mb-5 text-5xl">Priority Actions</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <section className="compact-top">
+                        <h3 style={{ marginBottom: 12 }}>Priority Actions</h3>
+                        <div className="grid-3">
                             {mainFeatures.map((feature) => {
                                 const Icon = feature.icon;
                                 return (
-                                    <button
-                                        key={feature.title}
-                                        onClick={feature.action}
-                                        className="nx-hover-lift group relative overflow-hidden rounded-2xl border border-[#16385f]/16 bg-white/90 p-7 text-left"
-                                    >
-                                        <p className="inline-flex rounded-full bg-[#edf4ff] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[#18447a]">
-                                            {feature.badge}
-                                        </p>
-                                        <div className="mt-4 inline-flex rounded-xl bg-[#edf4ff] p-3 text-[#174d86]">
-                                            <Icon size={26} />
-                                        </div>
-                                        <h4 className="mt-4 text-xl font-black text-[#0f2b4d]">{feature.title}</h4>
-                                        <p className="mt-1 text-[#16385f]/72">{feature.description}</p>
+                                    <button key={feature.title} onClick={feature.action} className="card" style={{ textAlign: 'left', cursor: 'pointer' }}>
+                                        <p className="badge">{feature.badge}</p>
+                                        <div style={{ marginTop: 10 }}><Icon size={20} /></div>
+                                        <h4 style={{ marginBottom: 4 }}>{feature.title}</h4>
+                                        <p className="muted" style={{ margin: 0 }}>{feature.description}</p>
                                     </button>
                                 );
                             })}
                         </div>
                     </section>
 
-                    <section>
-                        <h3 className="nx-heading mb-5 text-5xl">Quick Navigation</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <section className="compact-top">
+                        <h3 style={{ marginBottom: 12 }}>Quick Navigation</h3>
+                        <div className="grid-3">
                             {sideFeatures.map((feature) => {
                                 const Icon = feature.icon;
                                 return (
-                                    <button
-                                        key={feature.title}
-                                        onClick={feature.action}
-                                        className="nx-hover-lift group rounded-2xl border border-[#16385f]/16 bg-white/90 p-4 text-left"
-                                    >
-                                        <div className="flex items-start gap-3">
-                                            <div className="mt-1 rounded-lg bg-[#edf4ff] p-2 text-[#174d86]">
-                                                <Icon size={20} />
-                                            </div>
+                                    <button key={feature.title} onClick={feature.action} className="card" style={{ textAlign: 'left', cursor: 'pointer' }}>
+                                        <div style={{ display: 'flex', gap: 10 }}>
+                                            <Icon size={18} />
                                             <div>
-                                                <h5 className="font-bold text-[#0f2b4d] mb-1">{feature.title}</h5>
-                                                <p className="text-sm text-[#16385f]/70">{feature.description}</p>
+                                                <strong>{feature.title}</strong>
+                                                <p className="muted" style={{ margin: 0 }}>{feature.description}</p>
                                             </div>
                                         </div>
                                     </button>
@@ -207,22 +163,16 @@ export default function DashboardPage() {
                         </div>
                     </section>
 
-                    <section>
-                        <div className="mb-5 flex items-center gap-2">
-                            <Target size={18} className="text-[#174d86]" />
-                            <h3 className="nx-heading text-5xl">Eligible Companies for You</h3>
-                        </div>
+                    <section className="compact-top">
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Target size={18} /> Eligible Companies for You</h3>
                         <CompanyMatcher authToken={authToken} />
                     </section>
 
-                    <section>
-                        <div className="mb-5 flex items-center gap-2">
-                            <BookOpen size={18} className="text-[#174d86]" />
-                            <h3 className="nx-heading text-5xl">Community Q&A Forum</h3>
-                        </div>
+                    <section className="compact-top">
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><BookOpen size={18} /> Community Q&A Forum</h3>
                         <QuestionForum authToken={authToken} currentUserId={currentUserId} />
                     </section>
-                </div>
+                </main>
             </div>
         </div>
     );

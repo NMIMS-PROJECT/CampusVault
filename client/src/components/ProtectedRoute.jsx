@@ -17,10 +17,14 @@ export default function ProtectedRoute({ children }) {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-                <div className="text-center">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 animate-spin mb-4" />
-                    <p className="text-slate-600 dark:text-slate-400">Loading...</p>
+            <div className="app-shell">
+                <div className="app-frame">
+                    <main className="app-main" style={{ display: 'grid', placeItems: 'center', minHeight: '50vh' }}>
+                        <div className="panel" style={{ textAlign: 'center' }}>
+                            <div style={{ width: 34, height: 34, borderRadius: '50%', border: '3px solid #b4d6cb', borderTopColor: 'var(--accent)', margin: '0 auto', animation: 'spin 0.9s linear infinite' }} />
+                            <p className="muted">Loading...</p>
+                        </div>
+                    </main>
                 </div>
             </div>
         );

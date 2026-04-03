@@ -155,73 +155,68 @@ export const QuestionForum = ({ authToken, currentUserId }) => {
     };
 
     return (
-        <div className="rounded-3xl border border-white/20 bg-white/10 p-6 backdrop-blur-xl">
+        <div className="panel">
+            <header style={{ marginBottom: 14 }}>
+                <h1 style={{ margin: 0 }}>Q&amp;A Forum</h1>
+                <p className="muted">Ask questions and unlock expert answers</p>
+            </header>
+
+            {error && <div className="card" style={{ borderColor: 'rgba(154,47,47,0.35)', color: '#8b2f2f', marginBottom: 10 }}>{error}</div>}
+            {successMessage && <div className="card" style={{ borderColor: 'rgba(0,122,100,0.35)', color: '#0a5a49', marginBottom: 10 }}>{successMessage}</div>}
+
+            {authToken && (
+                <div className="card" style={{ marginBottom: 14 }}>
+                    <QuestionForm onSubmit={handlePostQuestion} isLoading={isPosting} />
+                </div>
+            )}
+
+            <div className="grid-2" style={{ marginBottom: 14 }}>
+                <input
+                    type="text"
+                    placeholder="Filter by company..."
+                    value={filterCompany}
+                    onChange={(event) => setFilterCompany(event.target.value)}
+                    className="field"
+                />
+
+                <div className="card" style={{ display: 'flex', alignItems: 'center' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <input
+                            type="checkbox"
+                            checked={filterPaidOnly}
+                            onChange={(event) => setFilterPaidOnly(event.target.checked)}
+                        />
+                        <span>Paid Questions Only</span>
+                    </label>
+                </div>
+            </div>
+
             <div>
-                <header className="mb-6">
-                    <h1 className="text-3xl font-semibold text-white">Q&amp;A Forum</h1>
-                    <p className="mt-1 text-slate-300">Ask questions and unlock expert answers</p>
-                </header>
+                {loading && <div className="card">Loading questions...</div>}
 
-                {error && <div className="mb-4 rounded-xl border border-rose-400/40 bg-rose-500/10 px-4 py-3 text-rose-200">{error}</div>}
-                {successMessage && <div className="mb-4 rounded-xl border border-emerald-400/40 bg-emerald-500/10 px-4 py-3 text-emerald-200">{successMessage}</div>}
-
-                {authToken && (
-                    <div className="mb-6 rounded-2xl border border-white/15 bg-black/20 p-4">
-                        <QuestionForm onSubmit={handlePostQuestion} isLoading={isPosting} />
+                {!loading && questions.length === 0 && (
+                    <div className="card" style={{ textAlign: 'center' }}>
+                        <p>No questions found. Be the first to post one!</p>
                     </div>
                 )}
 
-                <div className="mb-6 grid gap-3 md:grid-cols-[1fr_auto]">
+                {!loading && questions.length > 0 && (
                     <div>
-                        <input
-                            type="text"
-                            placeholder="Filter by company..."
-                            value={filterCompany}
-                            onChange={(event) => setFilterCompany(event.target.value)}
-                            className="w-full rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-slate-100 placeholder:text-slate-400 focus:border-cyan-300/70 focus:outline-none"
-                        />
-                    </div>
-
-                    <div className="rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-sm text-slate-100">
-                        <label className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                checked={filterPaidOnly}
-                                onChange={(event) => setFilterPaidOnly(event.target.checked)}
-                                className="h-4 w-4 accent-cyan-400"
+                        <h2 style={{ marginBottom: 10 }}>Recent Questions ({questions.length})</h2>
+                        <div className="stack">
+                        {questions.map((question) => (
+                            <QuestionCard
+                                key={question.id}
+                                question={question}
+                                currentUserId={currentUserId}
+                                hasPurchased={purchasedQuestions.has(question.id)}
+                                onPurchase={handlePurchase}
+                                isLoadingPurchase={isPurchasing === question.id}
                             />
-                            <span>Paid Questions Only</span>
-                        </label>
+                        ))}
+                        </div>
                     </div>
-                </div>
-
-                <div>
-                    {loading && <div className="rounded-xl border border-white/15 bg-black/20 px-4 py-5 text-slate-200">Loading questions...</div>}
-
-                    {!loading && questions.length === 0 && (
-                        <div className="rounded-xl border border-white/15 bg-black/20 p-6 text-center text-slate-300">
-                            <p>No questions found. Be the first to post one!</p>
-                        </div>
-                    )}
-
-                    {!loading && questions.length > 0 && (
-                        <div>
-                            <h2 className="mb-4 text-xl font-semibold text-white">Recent Questions ({questions.length})</h2>
-                            <div className="space-y-4">
-                            {questions.map((question) => (
-                                <QuestionCard
-                                    key={question.id}
-                                    question={question}
-                                    currentUserId={currentUserId}
-                                    hasPurchased={purchasedQuestions.has(question.id)}
-                                    onPurchase={handlePurchase}
-                                    isLoadingPurchase={isPurchasing === question.id}
-                                />
-                            ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
+                )}
             </div>
         </div>
     );

@@ -40,95 +40,85 @@ export default function CompanyDetailsPage() {
     }, [id]);
 
     if (loading) {
-        return (
-            <div className="rounded-3xl border border-white/20 bg-white/10 p-6 text-slate-200 backdrop-blur-xl">
-                <div className="rounded-xl border border-white/20 bg-black/20 px-4 py-3">Loading company details...</div>
-            </div>
-        );
+        return <div className="app-shell"><div className="app-frame"><main className="app-main"><div className="panel">Loading company details...</div></main></div></div>;
     }
 
     if (error || !company) {
         return (
-            <div className="rounded-3xl border border-white/20 bg-white/10 p-6 text-slate-200 backdrop-blur-xl">
-                <div className="rounded-xl border border-rose-400/40 bg-rose-500/10 p-5">
-                    <h2 className="text-xl font-semibold text-white">Error</h2>
-                    <p className="mt-2">{error || 'Company not found'}</p>
-                    <button className="mt-4 rounded-lg border border-white/30 bg-white/10 px-4 py-2 hover:bg-white/20" onClick={() => navigate(-1)}>Back</button>
+            <div className="app-shell">
+                <div className="app-frame">
+                    <main className="app-main">
+                        <div className="panel" style={{ color: '#8b2f2f' }}>
+                            <h2 style={{ marginTop: 0 }}>Error</h2>
+                            <p>{error || 'Company not found'}</p>
+                            <button className="btn btn-secondary" onClick={() => navigate(-1)}>Back</button>
+                        </div>
+                    </main>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="rounded-3xl border border-white/20 bg-white/10 p-6 text-slate-100 backdrop-blur-xl">
-            <div className="rounded-2xl border border-white/15 bg-black/20 p-5">
-                <button className="mb-4 rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-sm hover:bg-white/20" onClick={() => navigate(-1)}>Back</button>
-
-                <div className="flex flex-col gap-4 md:flex-row md:items-start">
-                    {company.logo && <img src={company.logo} alt={company.name} className="h-16 w-16 rounded-lg object-contain" />}
-
-                    <div className="min-w-0 flex-1">
-                        <h1 className="text-3xl font-semibold text-white">{company.name}</h1>
-                        <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                            <span className="rounded-full border border-cyan-300/40 bg-cyan-500/10 px-3 py-1 text-cyan-100">{company.industry}</span>
-                            <span className="rounded-full border border-emerald-300/40 bg-emerald-500/10 px-3 py-1 text-emerald-100">{company.location}</span>
-                        </div>
-
-                        {company.description && <p className="mt-4 text-slate-300">{company.description}</p>}
-
-                        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                            <div className="rounded-xl border border-white/20 bg-white/5 p-3">
-                                <span className="block text-xs text-slate-400">Min GPA Required</span>
-                                <span className="mt-1 block text-lg font-semibold">{company.minGpa}</span>
-                            </div>
-                            <div className="rounded-xl border border-white/20 bg-white/5 p-3">
-                                <span className="block text-xs text-slate-400">Open Positions</span>
-                                <span className="mt-1 block text-lg font-semibold">{company.placements?.length || 0}</span>
-                            </div>
-                            <div className="rounded-xl border border-white/20 bg-white/5 p-3">
-                                <span className="block text-xs text-slate-400">Discussions</span>
-                                <span className="mt-1 block text-lg font-semibold">{questions.length}</span>
+        <div className="app-shell">
+            <div className="app-frame">
+                <main className="app-main">
+                    <div className="panel">
+                        <button className="btn btn-secondary" onClick={() => navigate(-1)}>Back</button>
+                        <div style={{ display: 'flex', gap: 12, marginTop: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                            {company.logo && <img src={company.logo} alt={company.name} style={{ height: 64, width: 64, objectFit: 'contain' }} />}
+                            <div style={{ flex: 1, minWidth: 260 }}>
+                                <h1 style={{ margin: 0 }}>{company.name}</h1>
+                                <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                                    <span className="badge">{company.industry}</span>
+                                    <span className="badge">{company.location}</span>
+                                </div>
+                                {company.description && <p className="muted">{company.description}</p>}
+                                <div className="grid-3">
+                                    <div className="card"><span className="muted">Min GPA</span><strong>{company.minGpa}</strong></div>
+                                    <div className="card"><span className="muted">Open Positions</span><strong>{company.placements?.length || 0}</strong></div>
+                                    <div className="card"><span className="muted">Discussions</span><strong>{questions.length}</strong></div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div className="mt-5 flex flex-wrap gap-2">
-                <button className={`rounded-xl px-4 py-2 text-sm transition ${activeTab === 'overview' ? 'bg-cyan-400 text-slate-950' : 'border border-white/30 bg-white/10 hover:bg-white/20'}`} onClick={() => setActiveTab('overview')}>Overview</button>
-                <button className={`rounded-xl px-4 py-2 text-sm transition ${activeTab === 'placements' ? 'bg-cyan-400 text-slate-950' : 'border border-white/30 bg-white/10 hover:bg-white/20'}`} onClick={() => setActiveTab('placements')}>Placements ({company.placements?.length || 0})</button>
-                <button className={`rounded-xl px-4 py-2 text-sm transition ${activeTab === 'discussions' ? 'bg-cyan-400 text-slate-950' : 'border border-white/30 bg-white/10 hover:bg-white/20'}`} onClick={() => setActiveTab('discussions')}>Discussions ({questions.length})</button>
-            </div>
+                    <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <button className={activeTab === 'overview' ? 'btn btn-primary' : 'btn btn-secondary'} onClick={() => setActiveTab('overview')}>Overview</button>
+                        <button className={activeTab === 'placements' ? 'btn btn-primary' : 'btn btn-secondary'} onClick={() => setActiveTab('placements')}>Placements ({company.placements?.length || 0})</button>
+                        <button className={activeTab === 'discussions' ? 'btn btn-primary' : 'btn btn-secondary'} onClick={() => setActiveTab('discussions')}>Discussions ({questions.length})</button>
+                    </div>
 
-            <div className="mt-5">
+                    <div style={{ marginTop: 12 }}>
                 {activeTab === 'overview' && (
                     <div>
-                        <div className="grid gap-4 lg:grid-cols-2">
+                        <div className="grid-2">
                             {company.requiredSkills && company.requiredSkills.length > 0 && (
-                                <div className="rounded-2xl border border-white/20 bg-black/20 p-5">
-                                    <h3 className="text-lg font-semibold text-white">Required Skills</h3>
-                                    <div className="mt-3 flex flex-wrap gap-2">
+                                <div className="card">
+                                    <h3 style={{ marginTop: 0 }}>Required Skills</h3>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                                         {company.requiredSkills.map((skill) => (
-                                            <div key={skill} className="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm">{skill}</div>
+                                            <div key={skill} className="badge">{skill}</div>
                                         ))}
                                     </div>
                                 </div>
                             )}
 
                             {company.companyPrepResources && company.companyPrepResources.length > 0 && (
-                                <div className="rounded-2xl border border-white/20 bg-black/20 p-5">
-                                    <h3 className="text-lg font-semibold text-white">Preparation Resources</h3>
-                                    <div className="mt-3 space-y-2">
+                                <div className="card">
+                                    <h3 style={{ marginTop: 0 }}>Preparation Resources</h3>
+                                    <div className="stack">
                                         {company.companyPrepResources.map((resource) => (
-                                            <div key={resource.id} className="rounded-lg border border-white/20 bg-white/5 p-3">
-                                                <div className="text-xs uppercase tracking-wide text-cyan-200">{resource.resourceType}</div>
-                                                <div className="font-medium text-white">{resource.title}</div>
+                                            <div key={resource.id} className="card">
+                                                <div className="muted">{resource.resourceType}</div>
+                                                <div><strong>{resource.title}</strong></div>
                                                 {resource.fileUrl && (
                                                     <a
                                                         href={resource.fileUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="mt-2 inline-block text-sm text-cyan-300 hover:text-cyan-200"
+                                                        className="btn btn-secondary"
+                                                        style={{ marginTop: 8, display: 'inline-flex' }}
                                                     >
                                                         Download
                                                     </a>
@@ -145,38 +135,38 @@ export default function CompanyDetailsPage() {
                 {activeTab === 'placements' && (
                     <div>
                         {company.placements && company.placements.length > 0 ? (
-                            <div className="space-y-3">
+                            <div className="stack">
                                 {company.placements.map((placement) => (
-                                    <div key={placement.id} className="rounded-2xl border border-white/20 bg-black/20 p-5">
-                                        <div className="flex flex-wrap items-center justify-between gap-2">
-                                            <h3 className="text-lg font-semibold text-white">{placement.position}</h3>
-                                            <div className="rounded-full border border-amber-300/40 bg-amber-500/10 px-3 py-1 text-sm text-amber-100">
+                                    <div key={placement.id} className="card">
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 8 }}>
+                                            <h3 style={{ margin: 0 }}>{placement.position}</h3>
+                                            <div className="badge">
                                                 ₹{(placement.ctc || placement.salary || 0).toLocaleString()}
                                             </div>
                                         </div>
 
-                                        <div className="mt-3 grid gap-2 text-sm text-slate-200 sm:grid-cols-2">
-                                            <div className="rounded-lg border border-white/20 bg-white/5 px-3 py-2">
+                                        <div className="grid-2 compact-top">
+                                            <div className="card">
                                                 <strong>Salary Type:</strong>
                                                 <span className="ml-2">{placement.salaryType}</span>
                                             </div>
-                                            <div className="rounded-lg border border-white/20 bg-white/5 px-3 py-2">
+                                            <div className="card">
                                                 <strong>Location:</strong>
                                                 <span className="ml-2">{placement.location}</span>
                                             </div>
                                         </div>
 
                                         {placement.description && (
-                                            <div className="mt-3 rounded-lg border border-white/20 bg-white/5 p-3">
+                                            <div className="card compact-top">
                                                 <strong>Description:</strong>
-                                                <p className="mt-1 text-sm text-slate-300">{placement.description}</p>
+                                                <p className="muted">{placement.description}</p>
                                             </div>
                                         )}
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <div className="rounded-xl border border-white/20 bg-black/20 p-6 text-center text-slate-300">No placements available at the moment.</div>
+                            <div className="card">No placements available at the moment.</div>
                         )}
                     </div>
                 )}
@@ -184,29 +174,31 @@ export default function CompanyDetailsPage() {
                 {activeTab === 'discussions' && (
                     <div>
                         {questions.length > 0 ? (
-                            <div className="space-y-3">
+                            <div className="stack">
                                 {questions.map((question) => (
-                                    <div key={question.id} className="rounded-2xl border border-white/20 bg-black/20 p-5">
-                                        <div className="flex flex-wrap items-center justify-between gap-2">
-                                            <h4 className="text-lg font-semibold text-white">{question.title}</h4>
-                                            {question.isPaid && <span className="rounded-full border border-amber-300/40 bg-amber-500/10 px-2 py-1 text-xs text-amber-100">Paid</span>}
+                                    <div key={question.id} className="card">
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                                            <h4 style={{ margin: 0 }}>{question.title}</h4>
+                                            {question.isPaid && <span className="badge">Paid</span>}
                                         </div>
-                                        <p className="mt-2 text-slate-300">{question.text}</p>
-                                        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                                        <p className="muted">{question.text}</p>
+                                        <div className="muted" style={{ display: 'flex', flexWrap: 'wrap', gap: 10, fontSize: 12 }}>
                                             <span>By: {question.author.firstName} {question.author.lastName}</span>
                                             <span>{new Date(question.createdAt).toLocaleDateString()}</span>
-                                            {question.answer && <span className="rounded-full border border-emerald-300/40 bg-emerald-500/10 px-2 py-1 text-emerald-100">Answered</span>}
+                                            {question.answer && <span className="badge">Answered</span>}
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <div className="rounded-xl border border-white/20 bg-black/20 p-6 text-center text-slate-300">
+                            <div className="card">
                                 <p>No discussions yet. Be the first to ask a question!</p>
                             </div>
                         )}
                     </div>
                 )}
+            </div>
+                </main>
             </div>
         </div>
     );

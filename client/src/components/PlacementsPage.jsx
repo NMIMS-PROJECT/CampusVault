@@ -90,91 +90,52 @@ export default function PlacementsPage() {
     };
 
     return (
-        <div className="nx-shell">
-            <div className="nx-frame min-h-[calc(100vh-1.5rem)] md:min-h-[calc(100vh-2.5rem)]">
-            {/* Header */}
-            <nav className="nx-topbar sticky top-3 z-50 md:top-5">
-                <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 text-black hover:text-gray-700 font-medium">
-                    <ArrowLeft size={20} />
-                    Back
-                </button>
-                <h1 className="text-2xl font-bold text-black">Active Placements</h1>
-                <button onClick={handleLogout} className="flex items-center gap-2 text-red-700 hover:text-red-600 font-medium">
-                    <LogOut size={20} />
-                    Logout
-                </button>
-            </nav>
+        <div className="app-shell">
+            <div className="app-frame">
+                <nav className="app-nav">
+                    <button onClick={() => navigate('/dashboard')} className="btn btn-secondary"><ArrowLeft size={16} /> Back</button>
+                    <div className="app-brand">ACTIVE PLACEMENTS</div>
+                    <button onClick={handleLogout} className="btn btn-danger"><LogOut size={16} /> Logout</button>
+                </nav>
 
-            {/* Content */}
-            <div className="max-w-7xl mx-auto px-5 py-12 md:px-8">
-                {loading ? (
-                    <div className="text-center text-gray-700">Loading placements...</div>
-                ) : placements.length === 0 ? (
-                    <div className="text-center text-gray-700">No placements available</div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {placements.map((p) => (
-                            <div
-                                key={p.id}
-                                className="bg-white border border-gray-300 rounded-lg p-6 hover:border-black transition"
-                            >
-                                {/* Company & Position */}
-                                <div className="flex items-start justify-between mb-4">
-                                    <div>
-                                        <p className="text-sm text-gray-600">{p.company?.name}</p>
-                                        <h3 className="text-xl font-bold text-black">{p.position}</h3>
+                <main className="app-main">
+                    {loading ? (
+                        <div className="panel">Loading placements...</div>
+                    ) : placements.length === 0 ? (
+                        <div className="panel">No placements available</div>
+                    ) : (
+                        <div className="grid-2">
+                            {placements.map((p) => (
+                                <div key={p.id} className="card">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                                        <div>
+                                            <p className="muted" style={{ margin: 0 }}>{p.company?.name}</p>
+                                            <h3 style={{ margin: '3px 0 0 0' }}>{p.position}</h3>
+                                        </div>
+                                        {applications.has(p.id) && <span className="badge">Applied</span>}
                                     </div>
-                                    {applications.has(p.id) && (
-                                        <span className="px-3 py-1 bg-green-100 border border-green-300 text-green-700 rounded-full text-xs font-medium">
-                                            Applied
-                                        </span>
-                                    )}
+
+                                    <div className="stack compact-top">
+                                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}><DollarSign size={16} /> ₹{(p.ctc || p.salary).toLocaleString()} CTC</div>
+                                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}><MapPin size={16} /> {p.location}</div>
+                                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}><Calendar size={16} /> Deadline: {new Date(p.deadline).toLocaleDateString()}</div>
+                                    </div>
+
+                                    {p.description && <p className="muted">{p.description}</p>}
+
+                                    <button
+                                        onClick={() => handleApply(p.id)}
+                                        disabled={applications.has(p.id) || applyingId === p.id}
+                                        className="btn btn-primary btn-block"
+                                        type="button"
+                                    >
+                                        {applyingId === p.id ? 'Applying...' : applications.has(p.id) ? 'Already Applied' : 'Apply Now'}
+                                    </button>
                                 </div>
-
-                                {/* Details Grid */}
-                                <div className="space-y-3 mb-6">
-                                    <div className="flex items-center gap-3 text-gray-700">
-                                        <DollarSign size={18} className="text-black" />
-                                        <span>
-                                            ₹{(p.ctc || p.salary).toLocaleString()} CTC
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-gray-700">
-                                        <MapPin size={18} className="text-black" />
-                                        <span>{p.location}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-gray-700">
-                                        <Calendar size={18} className="text-black" />
-                                        <span>Deadline: {new Date(p.deadline).toLocaleDateString()}</span>
-                                    </div>
-                                </div>
-
-                                {/* Description */}
-                                {p.description && (
-                                    <p className="text-gray-600 text-sm mb-4">{p.description}</p>
-                                )}
-
-                                {/* Apply Button */}
-                                <button
-                                    onClick={() => handleApply(p.id)}
-                                    disabled={applications.has(p.id) || applyingId === p.id}
-                                    className={`w-full py-2 rounded-lg font-medium transition ${
-                                        applications.has(p.id)
-                                            ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
-                                            : 'bg-black text-white hover:bg-gray-800'
-                                    }`}
-                                >
-                                    {applyingId === p.id
-                                        ? 'Applying...'
-                                        : applications.has(p.id)
-                                        ? 'Already Applied'
-                                        : 'Apply Now'}
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+                            ))}
+                        </div>
+                    )}
+                </main>
             </div>
         </div>
     );
