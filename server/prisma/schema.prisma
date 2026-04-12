@@ -8,14 +8,14 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
+  id             String              @id @default(cuid())
+  email          String              @unique
   passwordHash   String
   name           String
   phone          String?
   avatarUrl      String?
-  credits        Int      @default(100)
-  tier           Tier     @default(BEGINNER)
+  credits        Int                 @default(100)
+  tier           Tier                @default(BEGINNER)
   gpa            Float?
   course         String?
   branch         String?
@@ -27,24 +27,16 @@ model User {
   targetRoles    String[]
   languages      String[]
   strongConcepts String[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  projects       Project[]
-  certifications Certification[]
-  assessments    Assessment[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
   answers        Answer[]
-  mentorSessions MentorSession[]    @relation("mentee")
-  hostedSessions MentorSession[]    @relation("mentor")
+  assessments    Assessment[]
+  certifications Certification[]
   creditTxns     CreditTransaction[]
+  mentorSessions MentorSession[]     @relation("mentee")
+  hostedSessions MentorSession[]     @relation("mentor")
+  projects       Project[]
   resume         Resume?
-}
-
-enum Tier {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-  PLACEMENT_READY
 }
 
 model Project {
@@ -82,7 +74,7 @@ model Assessment {
 }
 
 model Company {
-  id               String    @id @default(cuid())
+  id               String     @id @default(cuid())
   name             String
   logoUrl          String?
   minGpa           Float?
@@ -109,17 +101,17 @@ model Question {
 }
 
 model Answer {
-  id            String   @id @default(cuid())
-  questionId    String
-  userId        String
-  content       String
-  isPremium     Boolean  @default(false)
-  creditsToUnlock Int    @default(0)
-  creditsEarned Int      @default(0)
-  upvotes       Int      @default(0)
-  unlocks       AnswerUnlock[]
-  question      Question @relation(fields: [questionId], references: [id])
-  user          User     @relation(fields: [userId], references: [id])
+  id              String         @id @default(cuid())
+  questionId      String
+  userId          String
+  content         String
+  isPremium       Boolean        @default(false)
+  creditsToUnlock Int            @default(0)
+  creditsEarned   Int            @default(0)
+  upvotes         Int            @default(0)
+  question        Question       @relation(fields: [questionId], references: [id])
+  user            User           @relation(fields: [userId], references: [id])
+  unlocks         AnswerUnlock[]
 }
 
 model AnswerUnlock {
@@ -147,13 +139,6 @@ model MentorSession {
   mentor      User          @relation("mentor", fields: [mentorId], references: [id])
 }
 
-enum SessionStatus {
-  PENDING
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-}
-
 model CreditTransaction {
   id        String   @id @default(cuid())
   userId    String
@@ -173,3 +158,16 @@ model Resume {
   user         User     @relation(fields: [userId], references: [id])
 }
 
+enum Tier {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  PLACEMENT_READY
+}
+
+enum SessionStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
