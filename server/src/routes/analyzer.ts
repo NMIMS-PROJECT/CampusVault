@@ -174,7 +174,7 @@ analyzerRouter.post("/deep-dive", requireAuth, async (req, res) => {
   }
 
   try {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       await spendCredits(tx, auth.id, 50, "Deep-dive AI analysis");
     });
   } catch (error) {

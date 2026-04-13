@@ -1,6 +1,5 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import type { User } from "@prisma/client";
 import { env } from "../config/env.js";
 
 // FUTURE IMPLEMENTATION: Redis Implementation
@@ -8,6 +7,7 @@ import { env } from "../config/env.js";
 // and validated against a Redis store. Currently, auth is only JWT-based and stateless.
 
 type TokenPayload = { sub: string; email: string };
+type User = { id: string; email: string };
 
 export function hashPassword(password: string) {
   return bcrypt.hash(password, 10);

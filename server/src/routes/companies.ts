@@ -107,7 +107,7 @@ companiesRouter.get("/:id/questions", optionalAuth, async (req, res) => {
   // If user hasn't unlocked the bundle, redact question content
   const filteredQuestions = isUnlocked
     ? questions
-    : questions.map((q) => ({
+    : questions.map((q: any) => ({
         ...q,
         content: "[Locked] Unlock this company's question bundle to view content",
       }));
@@ -136,7 +136,7 @@ companiesRouter.post("/:id/unlock-bundle", requireAuth, async (req, res) => {
 
     let alreadyUnlocked = false;
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       const user = await tx.user.findUnique({ where: { id: auth.id } });
       if (!user || user.credits < bundlePrice) {
         throw new Error("Insufficient credits to unlock this bundle.");

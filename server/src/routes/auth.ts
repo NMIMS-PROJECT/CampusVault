@@ -88,7 +88,7 @@ authRouter.post("/register", async (req, res) => {
     return res.status(409).json({ message: "Email already in use." });
   }
 
-  const user = await prisma.$transaction(async (tx) => {
+  const user = await prisma.$transaction(async (tx: any) => {
     const created = await tx.user.create({
       data: {
         email: parsed.data.email,

@@ -69,7 +69,7 @@ assessmentRouter.post("/submit", requireAuth, async (req, res) => {
     creditAdjustment = -5;
   }
 
-  const assessment = await prisma.$transaction(async (tx) => {
+  const assessment = await prisma.$transaction(async (tx: any) => {
     // Update user tier
     await tx.user.update({
       where: { id: auth.id },

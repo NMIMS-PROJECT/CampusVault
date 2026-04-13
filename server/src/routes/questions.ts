@@ -76,7 +76,7 @@ questionsRouter.get("/:id/answers", optionalAuth, async (req, res) => {
     },
   });
 
-  const redactedAnswers = answers.map((answer) => {
+  const redactedAnswers = answers.map((answer: any) => {
     const hasUnlocked = answer.unlocks?.length > 0;
     const isOwner = auth?.id === answer.userId;
     
@@ -114,7 +114,7 @@ questionsRouter.post("/:id/answers", requireAuth, async (req, res) => {
     return res.status(404).json({ message: "Question not found." });
   }
 
-  const answer = await prisma.$transaction(async (tx) => {
+  const answer = await prisma.$transaction(async (tx: any) => {
     const created = await tx.answer.create({
       data: {
         questionId,
@@ -159,7 +159,7 @@ questionsRouter.post("/:id/unlock", requireAuth, async (req, res) => {
     let needsGeneration = false;
     let remainingCredits: number | null = null;
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       const user = await tx.user.findUnique({ where: { id: auth.id } });
       if (!user || user.credits < cost) throw new Error("Insufficient credits to unlock.");
       

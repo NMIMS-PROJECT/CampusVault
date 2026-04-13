@@ -31,7 +31,7 @@ answersRouter.post("/:id/unlock", requireAuth, async (req, res) => {
 
   const unlockCost = answer.creditsToUnlock;
   try {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       const existingUnlock = await tx.answerUnlock.findFirst({
         where: { answerId: answer.id, userId: auth.id },
       });
@@ -63,7 +63,7 @@ answersRouter.post("/:id/upvote", requireAuth, async (req, res) => {
   });
 
   if (answer.upvotes % 10 === 0) {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       await addCredits(tx, answer.userId, 5, `Upvote milestone (${answer.upvotes}) on answer ${answer.id}`);
     });
   }

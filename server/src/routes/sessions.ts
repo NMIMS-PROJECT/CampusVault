@@ -25,7 +25,7 @@ sessionsRouter.post("/book", requireAuth, async (req, res) => {
     return res.status(400).json({ message: "Invalid booking payload." });
   }
   try {
-    const session = await prisma.$transaction(async (tx) => {
+    const session = await prisma.$transaction(async (tx: any) => {
       if (!parsed.data.isFree && parsed.data.creditsUsed > 0) {
         await spendCredits(tx, auth.id, parsed.data.creditsUsed, "Booked mentor session");
       }
