@@ -9,7 +9,15 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     headers.set("Authorization", `Bearer ${options.authToken}`);
   }
 
-  const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  // Properly construct fetch options
+  const fetchOptions: RequestInit = {
+    method: options.method || "GET",
+    headers,
+  };
+  if (options.body) fetchOptions.body = options.body;
+  if (options.signal) fetchOptions.signal = options.signal;
+
+  const response = await fetch(`${API_BASE}${path}`, fetchOptions);
   const data = (await response.json()) as unknown;
   if (!response.ok) {
     const message =

@@ -12,6 +12,9 @@ type CompanyDetail = {
   name: string;
   description: string | null;
   package: string | null;
+  bundlePrice: number;
+  bundleStatus: "locked" | "unlocked";
+  isUnlocked: boolean;
   eligibleBranches: string[];
   requiredSkills: string[];
   questions: Array<{
@@ -37,6 +40,8 @@ export function CompanyDetailPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "qa" | "prep">("overview");
   const [unlockedAnswers, setUnlockedAnswers] = useState<Record<string, string>>({});
   const [unlockingId, setUnlockingId] = useState<string | null>(null);
+  const [unlockedBundle, setUnlockedBundle] = useState(false);
+  const [unlockingBundle, setUnlockingBundle] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -48,6 +53,7 @@ export function CompanyDetailPage() {
     apiRequest<CompanyDetail>(`/companies/${id}`, options)
       .then((data) => {
         setCompany(data);
+        setUnlockedBundle(data.isUnlocked);
         const existingUnlocks: Record<string, string> = {};
         for (const q of data.questions) {
           if (q.answers && q.answers.length > 0) {
@@ -66,18 +72,46 @@ export function CompanyDetailPage() {
     }
     setUnlockingId(questionId);
     try {
-      const result = await apiRequest<{ unlockedAnswer: string; creditsSpent: number }>(`/questions/${questionId}/unlock`, {
+      const result = await apiRequest<{ unlockedAnswer: string; creditsSpent: number; remainingCredits?: number | null }>(
+        `/questions/${questionId}/unlock`,
+        {
         method: "POST",
         authToken: token,
       });
       setUnlockedAnswers((prev) => ({ ...prev, [questionId]: result.unlockedAnswer }));
-      if (result.creditsSpent > 0) {
+      if (typeof result.remainingCredits === "number") {
+        setUser({ ...user, credits: result.remainingCredits });
+      } else if (result.creditsSpent > 0) {
         setUser({ ...user, credits: user.credits - result.creditsSpent });
       }
     } catch (e) {
       alert(e instanceof Error ? e.message : "Unlock failed");
     } finally {
       setUnlockingId(null);
+    }
+  };
+
+  const handleBundleUnlock = async () => {
+    if (!id || !token || !user || !company) {
+      alert("Please sign in to unlock bundle.");
+      return;
+    }
+    setUnlockingBundle(true);
+    try {
+      const result = await apiRequest<{ message: string; creditsSpent: number; remainingCredits: number }>(
+        `/companies/${id}/unlock-bundle`,
+        {
+          method: "POST",
+          authToken: token,
+        }
+      );
+      setUnlockedBundle(true);
+      setUser({ ...user, credits: result.remainingCredits });
+      alert(result.message);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Unlock failed");
+    } finally {
+      setUnlockingBundle(false);
     }
   };
 
@@ -124,23 +158,62 @@ export function CompanyDetailPage() {
                   {!company.requiredSkills.length && <span className="text-xs text-slate-400">None specified</span>}
                 </div>
               </div>
+              
+              {/* Bundle Status Section */}
+              <div className="border-t border-white/10 pt-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <h4 className="font-medium text-slate-200">Question Bundle</h4>
+                    <p className="text-sm text-slate-400">
+                      {unlockedBundle ? (
+                        <span className="text-emerald-400">✓ Unlocked</span>
+                      ) : (
+                        <>Unlock {company.questions.length} questions for <span className="font-medium text-yellow-400">{company.bundlePrice} credits</span></>
+                      )}
+                    </p>
+                  </div>
+                  {!unlockedBundle && (
+                    <GlowButton
+                      type="button"
+                      onClick={handleBundleUnlock}
+                      disabled={unlockingBundle || !token}
+                    >
+                      {unlockingBundle ? "Unlocking..." : `Unlock (${company.bundlePrice} Credits)`}
+                    </GlowButton>
+                  )}
+                </div>
+              </div>
             </GlassCard>
           )}
 
           {activeTab === "qa" && (
             <div className="space-y-3">
+              {!unlockedBundle && (
+                <GlassCard className="border-l-4 border-yellow-500 bg-yellow-500/5 text-yellow-200">
+                  <p className="text-sm">
+                    <span className="font-medium">Bundle Locked:</span> Unlock the full question bundle to see all interview questions for {company.name}.
+                  </p>
+                </GlassCard>
+              )}
               {company.questions.map((q) => (
                 <GlassCard key={q.id}>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 space-y-2">
                       <p className="text-slate-100">{q.content}</p>
-                      {/* Premium answers section (blurred if not unlocked) */}
+                      {/* Premium answers section or locked bundle message */}
                       <div className={clsx(
                         "mt-3 rounded border border-white/5 bg-black/40 p-4 text-sm",
-                        (q.isPremium && !unlockedAnswers[q.id]) && "select-none blur-sm"
+                        (!unlockedBundle || (q.isPremium && !unlockedAnswers[q.id])) && "select-none blur-sm"
                       )}>
                         <p className="text-slate-200">
-                          {unlockedAnswers[q.id] ? unlockedAnswers[q.id] : (q.isPremium ? "Premium answers are locked. This is a redacted preview representation. To view the exact answers for this specific question, you must spend credits." : "Free answers: The complete set of verified answers from seniors will be displayed directly here.")}</p>
+                          {!unlockedBundle ? (
+                            "Unlock the bundle to view all questions"
+                          ) : unlockedAnswers[q.id] ? (
+                            unlockedAnswers[q.id]
+                          ) : (
+                            q.isPremium ? "Premium answers are locked. This is a redacted preview representation. To view the exact answers for this specific question, you must spend credits." : "Free answers: The complete set of verified answers from seniors will be displayed directly here."
+                          )}
+                        </p>
                       </div>
                     </div>
                     
@@ -148,7 +221,7 @@ export function CompanyDetailPage() {
                       <span className="rounded bg-slate-800 px-2 py-1 text-xs font-medium text-slate-300">
                         {q.round} ({q.year})
                       </span>
-                      {(q.isPremium && !unlockedAnswers[q.id]) && (
+                      {(q.isPremium && !unlockedAnswers[q.id] && unlockedBundle) && (
                         <GlowButton type="button" onClick={() => handleUnlock(q.id)} disabled={unlockingId === q.id}>
                           {unlockingId === q.id ? "Unlocking..." : "Unlock (" + q.creditsToUnlock + " Credits)"}
                         </GlowButton>

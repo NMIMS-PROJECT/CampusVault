@@ -37,7 +37,14 @@ export function DashboardPage() {
   const setUser = useAuthStore((s) => s.setUser);
   const [eligibleCompanies, setEligibleCompanies] = useState<Company[]>([]);
   const [creditHistory, setCreditHistory] = useState<CreditHistory[]>([]);
+  const [dbStatus, setDbStatus] = useState<"connected" | "disconnected" | "checking">("checking");
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    apiRequest<{ ok: boolean; database: "connected" | "disconnected" }>("/health/db")
+      .then((data) => setDbStatus(data.database))
+      .catch(() => setDbStatus("disconnected"));
+  }, []);
 
   useEffect(() => {
     if (!token) {
@@ -92,6 +99,9 @@ export function DashboardPage() {
           {user ? (
             <div className="space-y-3">
               <p className="text-slate-100">Welcome, {user.name}</p>
+              <p className={`text-xs ${dbStatus === "connected" ? "text-emerald-300" : dbStatus === "disconnected" ? "text-rose-300" : "text-slate-400"}`}>
+                DB: {dbStatus}
+              </p>
               <div className="flex items-center gap-3">
                 <TierBadge tier={user.tier} />
                 <CreditChip credits={user.credits} />

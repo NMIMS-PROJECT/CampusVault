@@ -14,6 +14,8 @@ const envSchema = z.object({
   GITHUB_TOKEN: z.string().min(1).optional(),
   CLOUDINARY_URL: z.string().min(1).optional(),
   CLIENT_URL: z.string().url().default("http://localhost:5173"),
+  OLLAMA_URL: z.string().url().default("http://localhost:11434"),
+  OLLAMA_MODEL: z.string().default("minimax-m2.7"),
 });
 
 export const env = envSchema.parse(process.env);

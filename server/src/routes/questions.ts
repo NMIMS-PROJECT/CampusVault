@@ -157,6 +157,7 @@ questionsRouter.post("/:id/unlock", requireAuth, async (req, res) => {
 
     let alreadyUnlocked = false;
     let needsGeneration = false;
+    let remainingCredits: number | null = null;
 
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.findUnique({ where: { id: auth.id } });
@@ -167,10 +168,16 @@ questionsRouter.post("/:id/unlock", requireAuth, async (req, res) => {
       });
       if (existingUnlock) {
         alreadyUnlocked = true;
+        remainingCredits = user.credits;
         return; // Already unlocked
       }
 
       await spendCredits(tx, auth.id, cost, `Unlocked premium answer for question.`);
+      const updatedUser = await tx.user.findUnique({
+        where: { id: auth.id },
+        select: { credits: true },
+      });
+      remainingCredits = updatedUser?.credits ?? null;
       
       // Let's create the Answer in DB to persist the unlocked data
       const existingAnswer = await tx.answer.findFirst({ where: { questionId } });
@@ -190,12 +197,20 @@ questionsRouter.post("/:id/unlock", requireAuth, async (req, res) => {
     
     if (alreadyUnlocked) {
       const unlockedAnswer = await prisma.answer.findFirst({ where: { questionId } });
-      return res.status(200).json({ unlockedAnswer: unlockedAnswer?.content || "Previously unlocked content.", creditsSpent: 0 });
+      return res.status(200).json({
+        unlockedAnswer: unlockedAnswer?.content || "Previously unlocked content.",
+        creditsSpent: 0,
+        remainingCredits,
+      });
     }
 
     if (!needsGeneration) {
       const unlockedAnswer = await prisma.answer.findFirst({ where: { questionId } });
-      return res.status(200).json({ unlockedAnswer: unlockedAnswer?.content || "Previously unlocked content.", creditsSpent: cost });
+      return res.status(200).json({
+        unlockedAnswer: unlockedAnswer?.content || "Previously unlocked content.",
+        creditsSpent: cost,
+        remainingCredits,
+      });
     }
     
     // Generate AI answer dynamically to act as the "unlocked premium content"
@@ -235,7 +250,16 @@ questionsRouter.post("/:id/unlock", requireAuth, async (req, res) => {
       }
     });
 
-    return res.status(200).json({ unlockedAnswer: generatedContent, creditsSpent: cost });
+    const latestUser = await prisma.user.findUnique({
+      where: { id: auth.id },
+      select: { credits: true },
+    });
+
+    return res.status(200).json({
+      unlockedAnswer: generatedContent,
+      creditsSpent: cost,
+      remainingCredits: latestUser?.credits ?? remainingCredits,
+    });
   } catch (error) {
     return res.status(400).json({ message: error instanceof Error ? error.message : "Unlock failed." });
   }

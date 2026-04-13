@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { prisma } from "../lib/prisma.js";
 import { answersRouter } from "./answers.js";
 import { analyzerRouter } from "./analyzer.js";
 import { assessmentRouter } from "./assessment.js";
@@ -12,8 +13,38 @@ import { usersRouter } from "./users.js";
 
 export const apiRouter = Router();
 
-apiRouter.get("/health", (_req, res) => {
-  res.status(200).json({ ok: true, service: "placementos-api" });
+// Enhanced health check with DB status
+apiRouter.get("/health", async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({
+      ok: true,
+      service: "placementos-api",
+      database: "connected",
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(503).json({
+      ok: false,
+      service: "placementos-api",
+      database: "disconnected",
+      error: error instanceof Error ? error.message : "Unknown database error",
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+apiRouter.get("/health/db", async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return res.status(200).json({ ok: true, database: "connected" });
+  } catch (error) {
+    return res.status(503).json({
+      ok: false,
+      database: "disconnected",
+      error: error instanceof Error ? error.message : "Unknown database error",
+    });
+  }
 });
 
 apiRouter.use("/auth", authRouter);

@@ -2,7 +2,6 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth, type AuthedRequest } from "../middleware/auth.js";
-import { addCredits } from "../services/credits.js";
 import {
   hashPassword,
   signAccessToken,
@@ -11,19 +10,57 @@ import {
   verifyRefreshToken,
 } from "../services/auth.js";
 
+const optionalText = z.preprocess(
+  (value) => {
+    if (typeof value !== "string") return value;
+    const trimmed = value.trim();
+    return trimmed === "" ? undefined : trimmed;
+  },
+  z.string().optional(),
+);
+
+const optionalUrl = z.preprocess(
+  (value) => {
+    if (typeof value !== "string") return value;
+    const trimmed = value.trim();
+    return trimmed === "" ? undefined : trimmed;
+  },
+  z.string().url().optional(),
+);
+
+const optionalYear = z.preprocess(
+  (value) => {
+    if (value === "" || value === null || value === undefined) return undefined;
+    if (typeof value === "number") return value;
+    if (typeof value === "string") return Number(value);
+    return value;
+  },
+  z.number().int().min(1).max(5).optional(),
+);
+
+const optionalGpa = z.preprocess(
+  (value) => {
+    if (value === "" || value === null || value === undefined) return undefined;
+    if (typeof value === "number") return value;
+    if (typeof value === "string") return Number(value);
+    return value;
+  },
+  z.number().min(0).max(10).optional(),
+);
+
 const registerSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().email(),
   password: z.string().min(8),
-  name: z.string().min(2),
-  phone: z.string().optional(),
-  college: z.string().optional(),
-  course: z.string().optional(),
-  branch: z.string().optional(),
-  year: z.number().int().min(1).max(5).optional(),
-  gpa: z.number().min(0).max(10).optional(),
-  githubUrl: z.string().url().optional(),
-  linkedinUrl: z.string().url().optional(),
-  leetcodeUrl: z.string().url().optional(),
+  name: z.string().trim().min(2),
+  phone: optionalText,
+  college: optionalText,
+  course: optionalText,
+  branch: optionalText,
+  year: optionalYear,
+  gpa: optionalGpa,
+  githubUrl: optionalUrl,
+  linkedinUrl: optionalUrl,
+  leetcodeUrl: optionalUrl,
   targetRoles: z.array(z.string()).default([]),
   languages: z.array(z.string()).default([]),
   strongConcepts: z.array(z.string()).default([]),
@@ -39,7 +76,11 @@ export const authRouter = Router();
 authRouter.post("/register", async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ message: "Invalid registration payload." });
+    const firstIssue = parsed.error.issues[0];
+    const issuePath = firstIssue?.path?.join(".") ?? "request";
+    return res.status(400).json({
+      message: `Invalid registration payload at '${issuePath}': ${firstIssue?.message ?? "Invalid value."}`,
+    });
   }
 
   const existing = await prisma.user.findUnique({ where: { email: parsed.data.email } });
@@ -66,7 +107,20 @@ authRouter.post("/register", async (req, res) => {
         languages: parsed.data.languages,
         strongConcepts: parsed.data.strongConcepts,
       },
-      select: { id: true, email: true, name: true, tier: true, credits: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        tier: true,
+        credits: true,
+        branch: true,
+        gpa: true,
+        course: true,
+        year: true,
+        targetRoles: true,
+        languages: true,
+        strongConcepts: true,
+      },
     });
     // Create an initial credit transaction log for the default 100 credits without giving extra
     await tx.creditTransaction.create({
@@ -94,7 +148,20 @@ authRouter.post("/login", async (req, res) => {
   const accessToken = signAccessToken(user);
   const refreshToken = signRefreshToken(user);
   return res.json({
-    user: { id: user.id, email: user.email, name: user.name, tier: user.tier, credits: user.credits },
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      tier: user.tier,
+      credits: user.credits,
+      branch: user.branch,
+      gpa: user.gpa,
+      course: user.course,
+      year: user.year,
+      targetRoles: user.targetRoles,
+      languages: user.languages,
+      strongConcepts: user.strongConcepts,
+    },
     accessToken,
     refreshToken,
   });
@@ -113,7 +180,20 @@ authRouter.post("/refresh", async (req, res) => {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.sub },
-    select: { id: true, email: true, name: true, tier: true, credits: true },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      tier: true,
+      credits: true,
+      branch: true,
+      gpa: true,
+      course: true,
+      year: true,
+      targetRoles: true,
+      languages: true,
+      strongConcepts: true,
+    },
   });
 
   if (!user) {
@@ -121,7 +201,7 @@ authRouter.post("/refresh", async (req, res) => {
   }
 
   const accessToken = signAccessToken(user);
-  return res.json({ accessToken });
+  return res.json({ accessToken, user });
 });
 
 authRouter.get("/me", requireAuth, async (req, res) => {

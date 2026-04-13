@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { z } from "zod";
-import OpenAI from "openai";
 import multer from "multer";
 import { requireAuth, type AuthedRequest } from "../middleware/auth.js";        
 import { prisma } from "../lib/prisma.js";
@@ -8,6 +7,21 @@ import { spendCredits } from "../services/credits.js";
 import { env } from "../config/env.js";
 
 const upload = multer({ storage: multer.memoryStorage() });
+
+// Validation schema for analyzer response
+const AnalyzerResultSchema = z.object({
+  profileScore: z.object({
+    projects: z.number().min(0).max(100),
+    skills: z.number().min(0).max(100),
+    dsa: z.number().min(0).max(100),
+    communication: z.number().min(0).max(100),
+    experience: z.number().min(0).max(100),
+  }),
+  salaryRange: z.string().min(5),
+  gaps: z.array(z.string()).min(3).max(5),
+});
+
+type AnalyzerResult = z.infer<typeof AnalyzerResultSchema>;
 
 export const analyzerRouter = Router();
 
@@ -35,15 +49,8 @@ analyzerRouter.post("/run", requireAuth, upload.single("resumePdf"), async (req,
       }
     });
 
-    if (!env.OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is not configured.");
-    }
-
-    const isGemini = env.OPENAI_API_KEY.startsWith("AIza");
-    const client = new OpenAI({ 
-      apiKey: env.OPENAI_API_KEY,
-      ...(isGemini && { baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/" })
-    });
+    const ollamaUrl = env.OLLAMA_URL;
+    const ollamaModel = env.OLLAMA_MODEL;
 
     const profileData = {
       resume: resumeText,
@@ -55,45 +62,108 @@ analyzerRouter.post("/run", requireAuth, upload.single("resumePdf"), async (req,
       gpa: user?.gpa,
     };
 
-    const completion = await client.chat.completions.create({
-      model: isGemini ? "gemini-2.5-flash" : "gpt-4o-mini",
-      response_format: { type: "json_object" },
-      temperature: 0.3,
-      messages: [
-        {
-          role: "system",
-          content: "You are a career strategist specializing in Indian campus placements. Analyze the user profile and provide: 1) A score (0-100) for each category: DSA, Projects, Skills, Communication, Experience. 2) An estimated salary range for Indian tech companies (e.g. '₹8 - 14 LPA'). 3) Top 3-5 specific gaps to address as an array of strings. Return valid JSON only with keys shape: { profileScore: { projects: number, skills: number, dsa: number, communication: number, experience: number }, salaryRange: string, gaps: string[] }."
-        },
-        {
-          role: "user",
-          content: JSON.stringify(profileData),
-        }
-      ]
+    const systemPrompt = "You are a career strategist specializing in Indian campus placements. Analyze the user profile and provide: 1) A score (0-100) for each category: DSA, Projects, Skills, Communication, Experience. 2) An estimated salary range for Indian tech companies (e.g. '₹8 - 14 LPA'). 3) Top 3-5 specific gaps to address as an array of strings. Return valid JSON only with keys shape: { profileScore: { projects: number, skills: number, dsa: number, communication: number, experience: number }, salaryRange: string, gaps: string[] }.";
+
+    const ollamaResponse = await fetch(`${ollamaUrl}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: ollamaModel,
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt
+          },
+          {
+            role: "user",
+            content: JSON.stringify(profileData),
+          }
+        ],
+        stream: false,
+        temperature: 0.3,
+      }),
     });
 
-    const raw = completion.choices[0]?.message?.content;
-    if (!raw) {
-      throw new Error("OpenAI returned an empty response.");
+    if (!ollamaResponse.ok) {
+      throw new Error(`Ollama API error: ${ollamaResponse.statusText}`);
     }
 
-    const cleaned = raw.replace(/```json/g, "").replace(/```/g, "").trim();
-    const result = JSON.parse(cleaned);
+    const ollamaData = await ollamaResponse.json();
+    const raw = ollamaData.message?.content;
+    if (!raw) {
+      throw new Error("Ollama returned an empty response.");
+    }
+
+    console.log("📊 Raw Ollama response:", raw.substring(0, 200) + "...");
+
+    // Extract JSON from response (handles markdown code blocks)
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("No valid JSON found in Ollama response.");
+    }
+
+    const cleaned = jsonMatch[0];
+    let result: any;
+    
+    try {
+      result = JSON.parse(cleaned);
+    } catch (parseError) {
+      console.error("❌ JSON Parse Error:", parseError);
+      throw new Error("Failed to parse Ollama response as JSON.");
+    }
+
+    // Validate against schema
+    let validatedResult: AnalyzerResult;
+    try {
+      validatedResult = AnalyzerResultSchema.parse(result);
+      console.log("✅ Analysis validated successfully:", validatedResult);
+    } catch (validationError) {
+      console.error("❌ Validation Error:", validationError);
+      throw new Error(
+        `Invalid analysis format: ${
+          validationError instanceof z.ZodError
+            ? (validationError.issues[0]?.message ?? "Unknown validation error")
+            : "Unknown error"
+        }`,
+      );
+    }
+
+    // Ensure scores are reasonable based on user data
+    if (user?.gpa && user.gpa >= 8) {
+      validatedResult.profileScore.dsa = Math.max(validatedResult.profileScore.dsa, 60);
+    }
+    if (user?.projects && user.projects.length > 0) {
+      validatedResult.profileScore.projects = Math.max(validatedResult.profileScore.projects, 65);
+    }
 
     await prisma.resume.upsert({
       where: { userId: auth.id },
-      update: { analysisJson: result, salaryEst: result.salaryRange },
+      update: { analysisJson: validatedResult, salaryEst: validatedResult.salaryRange },
       create: {
         userId: auth.id,
         fileUrl: req.file ? "mock-cloudinary-url.pdf" : "inline://resume-text",
-        analysisJson: result,
-        salaryEst: result.salaryRange,
+        analysisJson: validatedResult,
+        salaryEst: validatedResult.salaryRange,
       },
     });
 
-    return res.json(result);
+    return res.json(validatedResult);
   } catch (error) {
-    console.error("Analyzer Error:", error);
-    return res.status(500).json({ message: "Failed to analyze profile." });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("❌ Analyzer Error:", errorMessage);
+    
+    // Return more specific error messages for debugging
+    if (errorMessage.includes("ECONNREFUSED")) {
+      return res.status(503).json({ message: "Ollama service not available. Make sure Ollama is running on " + env.OLLAMA_URL });
+    }
+    if (errorMessage.includes("not found")) {
+      return res.status(503).json({ message: `Ollama model '${env.OLLAMA_MODEL}' not found. Run: ollama pull ${env.OLLAMA_MODEL}` });
+    }
+    if (errorMessage.includes("JSON")) {
+      return res.status(400).json({ message: "Invalid response format from AI. Please try again." });
+    }
+    
+    return res.status(500).json({ message: errorMessage || "Failed to analyze profile." });
   }
 });
 

@@ -11,7 +11,16 @@ export type AuthUser = {
   credits: number;
   branch?: string | null;
   gpa?: number | null;
+  course?: string | null;
+  year?: number | null;
+  college?: string | null;
+  phone?: string | null;
+  targetRoles?: string[];
+  languages?: string[];
   strongConcepts?: string[];
+  githubUrl?: string | null;
+  linkedinUrl?: string | null;
+  leetcodeUrl?: string | null;
 };
 
 type AuthState = {

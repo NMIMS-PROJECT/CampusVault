@@ -37,6 +37,7 @@ model User {
   hostedSessions MentorSession[]     @relation("mentor")
   projects       Project[]
   resume         Resume?
+  companyUnlocks CompanyUnlock[]
 }
 
 model Project {
@@ -74,7 +75,7 @@ model Assessment {
 }
 
 model Company {
-  id               String     @id @default(cuid())
+  id               String          @id @default(cuid())
   name             String
   logoUrl          String?
   minGpa           Float?
@@ -84,13 +85,15 @@ model Company {
   placementDate    DateTime?
   package          String?
   description      String?
+  bundlePrice      Int             @default(50)
   questions        Question[]
+  unlocks          CompanyUnlock[]
 }
 
 model Question {
   id              String   @id @default(cuid())
   companyId       String
-  postedById      String
+  postedById      String?
   content         String
   round           String
   year            Int
@@ -123,6 +126,18 @@ model AnswerUnlock {
   answer    Answer   @relation(fields: [answerId], references: [id])
 
   @@unique([answerId, userId])
+}
+
+model CompanyUnlock {
+  id        String   @id @default(cuid())
+  companyId String
+  userId    String
+  cost      Int
+  createdAt DateTime @default(now())
+  company   Company  @relation(fields: [companyId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([companyId, userId])
 }
 
 model MentorSession {

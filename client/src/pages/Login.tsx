@@ -53,50 +53,54 @@ export function LoginPage() {
 
   return (
     <PageTransition>
-      <PageWrapper title="Login" subtitle="Sign in to your CampusVault account.">
-        <GlassCard>
-          <form className="space-y-5 max-w-md" onSubmit={handleLogin}>
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">Email</label>
-              <GlowInput
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-              />
-            </div>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <PageWrapper title="Login" subtitle="Sign in to your CampusVault account.">
+          <div className="max-w-md mx-auto">
+            <GlassCard>
+              <form className="space-y-5" onSubmit={handleLogin}>
+                <div>
+                  <label className="block text-sm font-medium text-slate-200 mb-2">Email</label>
+                  <GlowInput
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                  />
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">Password</label>
-              <GlowInput
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-200 mb-2">Password</label>
+                  <GlowInput
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                  />
+                </div>
 
-            {error ? <p className="text-sm text-rose-300 bg-rose-500/10 p-3 rounded-lg">{error}</p> : null}
+                {error ? <p className="text-sm text-rose-300 bg-rose-500/10 p-3 rounded-lg">{error}</p> : null}
 
-            <GlowButton type="submit" disabled={loading} className="w-full">
-              {loading ? "Signing in..." : "Sign In"}
-            </GlowButton>
+                <GlowButton type="submit" disabled={loading} className="w-full">
+                  {loading ? "Signing in..." : "Sign In"}
+                </GlowButton>
 
-            <p className="text-center text-sm text-slate-400">
-              Don't have an account?{" "}
-              <Link to="/register" className="text-indigo-400 hover:text-indigo-300 transition-colors">
-                Register here
-              </Link>
-            </p>
+                <p className="text-center text-sm text-slate-400">
+                  Don't have an account?{" "}
+                  <Link to="/register" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+                    Register here
+                  </Link>
+                </p>
 
-            <div className="pt-4 border-t border-white/10">
-              <p className="text-xs text-slate-400 mb-2">Demo Account:</p>
-              <p className="text-xs text-slate-300">Email: <code className="text-cyan-300">demo@placementos.dev</code></p>
-              <p className="text-xs text-slate-300">Password: <code className="text-cyan-300">Demo12345!</code></p>
-            </div>
-          </form>
-        </GlassCard>
-      </PageWrapper>
+                <div className="pt-4 border-t border-white/10">
+                  <p className="text-xs text-slate-400 mb-2">Demo Account:</p>
+                  <p className="text-xs text-slate-300">Email: <code className="text-cyan-300">demo@placementos.dev</code></p>
+                  <p className="text-xs text-slate-300">Password: <code className="text-cyan-300">Demo12345!</code></p>
+                </div>
+              </form>
+            </GlassCard>
+          </div>
+        </PageWrapper>
+      </div>
     </PageTransition>
   );
 }

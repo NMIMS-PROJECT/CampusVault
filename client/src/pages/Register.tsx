@@ -32,9 +32,35 @@ const registerSchema = z.object({
 
 type RegisterValues = z.infer<typeof registerSchema>;
 
-const roles = ["SWE", "Data Analyst", "DevOps", "ML Engineer", "Frontend Dev"];
-const languages = ["Python", "Java", "C++", "JavaScript", "Go"];
-const concepts = ["DSA", "DBMS", "OS", "CN", "System Design", "ML"];
+// Step 2 options (engineering-focused)
+const courses = [
+  "B.Tech (Computer Science)",
+  "B.Tech (Information Technology)",
+  "B.Tech (AI/ML)",
+  "B.Tech (Electronics & Communication)",
+  "B.Tech (Electrical Engineering)",
+  "BCA",
+  "M.Tech",
+  "Other",
+];
+
+const branches = [
+  "CSE",
+  "IT",
+  "AIML",
+  "ECE",
+  "EEE",
+  "Mechanical",
+  "Civil",
+  "Other",
+];
+
+const years = [1, 2, 3, 4, 5];
+
+// Step 3 options
+const roles = ["SWE", "Data Analyst", "DevOps", "ML Engineer", "Frontend Dev", "Other"];
+const languages = ["Python", "Java", "C++", "JavaScript", "Go", "Other"];
+const concepts = ["DSA", "DBMS", "OS", "CN", "System Design", "ML", "Other"];
 
 export function RegisterPage() {
   const [step, setStep] = useState(1);
@@ -42,6 +68,9 @@ export function RegisterPage() {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [selectedConcepts, setSelectedConcepts] = useState<string[]>([]);
+  const [customRole, setCustomRole] = useState("");
+  const [customLanguage, setCustomLanguage] = useState("");
+  const [customConcept, setCustomConcept] = useState("");
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
   const isAuthenticated = useAuthStore((s) => !!s.accessToken);
@@ -52,7 +81,7 @@ export function RegisterPage() {
     }
   }, [isAuthenticated, navigate]);
 
-  const { register, handleSubmit, setValue } = useForm<RegisterValues>({
+  const { register, handleSubmit, setValue, trigger } = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       targetRoles: [],
@@ -72,6 +101,25 @@ export function RegisterPage() {
     setValue("targetRoles", next);
   };
 
+  const goToNextStep = async () => {
+    const fieldsByStep: Record<number, Array<keyof RegisterValues>> = {
+      1: ["name", "email", "password", "college"],
+      2: ["course", "branch", "year", "gpa"],
+      3: ["targetRoles", "languages", "strongConcepts"],
+    };
+    const fieldsToValidate = fieldsByStep[step];
+    if (!fieldsToValidate) {
+      return;
+    }
+    const isValid = await trigger(fieldsToValidate);
+    if (!isValid) {
+      setError("Please complete all required fields in this step.");
+      return;
+    }
+    setError("");
+    setStep((prev) => Math.min(4, prev + 1));
+  };
+
   const toggleLanguages = (value: string) => {
     const next = selectedLanguages.includes(value)
       ? selectedLanguages.filter((item) => item !== value)
@@ -88,6 +136,33 @@ export function RegisterPage() {
     setValue("strongConcepts", next);
   };
 
+  const addCustomRole = () => {
+    const trimmed = customRole.trim();
+    if (!trimmed || selectedRoles.includes(trimmed)) return;
+    const next = [...selectedRoles, trimmed];
+    setSelectedRoles(next);
+    setValue("targetRoles", next);
+    setCustomRole("");
+  };
+
+  const addCustomLanguage = () => {
+    const trimmed = customLanguage.trim();
+    if (!trimmed || selectedLanguages.includes(trimmed)) return;
+    const next = [...selectedLanguages, trimmed];
+    setSelectedLanguages(next);
+    setValue("languages", next);
+    setCustomLanguage("");
+  };
+
+  const addCustomConcept = () => {
+    const trimmed = customConcept.trim();
+    if (!trimmed || selectedConcepts.includes(trimmed)) return;
+    const next = [...selectedConcepts, trimmed];
+    setSelectedConcepts(next);
+    setValue("strongConcepts", next);
+    setCustomConcept("");
+  };
+
   const onSubmit = async (values: RegisterValues) => {
     setError("");
     try {
@@ -101,10 +176,15 @@ export function RegisterPage() {
         method: "POST",
         body: JSON.stringify(payload),
       });
-      setAuth(result);
+      // Ensure proper payload structure for setAuth
+      setAuth({
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        user: result.user,
+      });
       navigate("/assessment");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Registration failed.");
+      setError(e instanceof Error ? e.message : "Registration failed. Please try again.");
     }
   };
 
@@ -127,9 +207,48 @@ export function RegisterPage() {
 
           {step === 2 ? (
             <div className="grid gap-3 md:grid-cols-2">
-              <GlowInput {...register("course")} placeholder="Course" />
-              <GlowInput {...register("branch")} placeholder="Branch" />
-              <GlowInput {...register("year", { valueAsNumber: true })} type="number" placeholder="Year" />
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-2">Course</label>
+                <select
+                  {...register("course")}
+                  className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-400/60 text-sm"
+                >
+                  <option value="">Select Course</option>
+                  {courses.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-2">Branch</label>
+                <select
+                  {...register("branch")}
+                  className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-400/60 text-sm"
+                >
+                  <option value="">Select Branch</option>
+                  {branches.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-2">Year</label>
+                <select
+                  {...register("year", { valueAsNumber: true })}
+                  className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-400/60 text-sm"
+                >
+                  <option value="">Select Year</option>
+                  {years.map((y) => (
+                    <option key={y} value={y}>
+                      Year {y}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <GlowInput
                 {...register("gpa", { valueAsNumber: true })}
                 type="number"
@@ -143,22 +262,162 @@ export function RegisterPage() {
             <div className="space-y-4">
               <SelectionGroup
                 title="Target Roles"
-                values={selectedRoles}
-                options={roles}
+                values={selectedRoles.filter((v) => v !== "Other") || []}
+                options={roles.filter((r) => r !== "Other")}
                 onToggle={toggleRoles}
               />
+              {selectedRoles.includes("Other") && (
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-400">Add custom role</p>
+                  <div className="flex gap-2">
+                    <GlowInput
+                      value={customRole}
+                      onChange={(e) => setCustomRole(e.target.value)}
+                      placeholder="Enter custom role"
+                      className="flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={addCustomRole}
+                      className="rounded-lg border border-indigo-400/50 bg-indigo-500/20 px-3 py-2 text-xs text-indigo-100 hover:bg-indigo-500/30"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
+              )}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {selectedRoles.filter((v) => v !== "Other").map((role) => (
+                  <button
+                    key={role}
+                    type="button"
+                    onClick={() => {
+                      const next = selectedRoles.filter((r) => r !== role);
+                      setSelectedRoles(next);
+                      setValue("targetRoles", next);
+                    }}
+                    className="rounded-lg border border-indigo-400/50 bg-indigo-500/20 px-3 py-1.5 text-xs text-indigo-100 cursor-pointer flex items-center gap-1"
+                  >
+                    {role}
+                    <span className="text-indigo-300">×</span>
+                  </button>
+                ))}
+                {!selectedRoles.includes("Other") && (
+                  <button
+                    type="button"
+                    onClick={() => toggleRoles("Other")}
+                    className="rounded-lg border border-white/20 bg-black/20 px-3 py-1.5 text-xs text-slate-300"
+                  >
+                    Other
+                  </button>
+                )}
+              </div>
+
               <SelectionGroup
                 title="Languages"
-                values={selectedLanguages}
-                options={languages}
+                values={selectedLanguages.filter((v) => v !== "Other") || []}
+                options={languages.filter((l) => l !== "Other")}
                 onToggle={toggleLanguages}
               />
+              {selectedLanguages.includes("Other") && (
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-400">Add custom language</p>
+                  <div className="flex gap-2">
+                    <GlowInput
+                      value={customLanguage}
+                      onChange={(e) => setCustomLanguage(e.target.value)}
+                      placeholder="Enter custom language"
+                      className="flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={addCustomLanguage}
+                      className="rounded-lg border border-indigo-400/50 bg-indigo-500/20 px-3 py-2 text-xs text-indigo-100 hover:bg-indigo-500/30"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
+              )}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {selectedLanguages.filter((v) => v !== "Other").map((lang) => (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => {
+                      const next = selectedLanguages.filter((l) => l !== lang);
+                      setSelectedLanguages(next);
+                      setValue("languages", next);
+                    }}
+                    className="rounded-lg border border-indigo-400/50 bg-indigo-500/20 px-3 py-1.5 text-xs text-indigo-100 cursor-pointer flex items-center gap-1"
+                  >
+                    {lang}
+                    <span className="text-indigo-300">×</span>
+                  </button>
+                ))}
+                {!selectedLanguages.includes("Other") && (
+                  <button
+                    type="button"
+                    onClick={() => toggleLanguages("Other")}
+                    className="rounded-lg border border-white/20 bg-black/20 px-3 py-1.5 text-xs text-slate-300"
+                  >
+                    Other
+                  </button>
+                )}
+              </div>
+
               <SelectionGroup
                 title="Strong Concepts"
-                values={selectedConcepts}
-                options={concepts}
+                values={selectedConcepts.filter((v) => v !== "Other") || []}
+                options={concepts.filter((c) => c !== "Other")}
                 onToggle={toggleConcepts}
               />
+              {selectedConcepts.includes("Other") && (
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-400">Add custom concept</p>
+                  <div className="flex gap-2">
+                    <GlowInput
+                      value={customConcept}
+                      onChange={(e) => setCustomConcept(e.target.value)}
+                      placeholder="Enter custom concept"
+                      className="flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={addCustomConcept}
+                      className="rounded-lg border border-indigo-400/50 bg-indigo-500/20 px-3 py-2 text-xs text-indigo-100 hover:bg-indigo-500/30"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
+              )}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {selectedConcepts.filter((v) => v !== "Other").map((concept) => (
+                  <button
+                    key={concept}
+                    type="button"
+                    onClick={() => {
+                      const next = selectedConcepts.filter((c) => c !== concept);
+                      setSelectedConcepts(next);
+                      setValue("strongConcepts", next);
+                    }}
+                    className="rounded-lg border border-indigo-400/50 bg-indigo-500/20 px-3 py-1.5 text-xs text-indigo-100 cursor-pointer flex items-center gap-1"
+                  >
+                    {concept}
+                    <span className="text-indigo-300">×</span>
+                  </button>
+                ))}
+                {!selectedConcepts.includes("Other") && (
+                  <button
+                    type="button"
+                    onClick={() => toggleConcepts("Other")}
+                    className="rounded-lg border border-white/20 bg-black/20 px-3 py-1.5 text-xs text-slate-300"
+                  >
+                    Other
+                  </button>
+                )}
+              </div>
             </div>
           ) : null}
 
@@ -184,7 +443,7 @@ export function RegisterPage() {
             ) : null}
 
             {step < 4 ? (
-              <GlowButton type="button" onClick={() => setStep((prev) => Math.min(4, prev + 1))}>
+              <GlowButton type="button" onClick={goToNextStep}>
                 Next
               </GlowButton>
             ) : (
