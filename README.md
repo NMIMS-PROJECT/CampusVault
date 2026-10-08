@@ -1,3 +1,4 @@
+
 # PlacementOS (CampusVault_3.0)
 
 PlacementOS is being built directly inside this repository as a full-stack campus placement platform.
@@ -8,7 +9,7 @@ PlacementOS is being built directly inside this repository as a full-stack campu
 - `server/` — Express + TypeScript backend
 - `server/prisma/schema.prisma` — database schema
 - `docker-compose.yml` — local PostgreSQL + Redis
-
+  
 ## Quick Start
 
 1. Copy `.env.example` to `.env` in the repository root and fill secrets.
